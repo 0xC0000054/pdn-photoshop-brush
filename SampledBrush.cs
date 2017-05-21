@@ -16,6 +16,7 @@ namespace AbrFileTypePlugin
         private readonly string name;
         private readonly string tag;
         private readonly int diameter;
+        private readonly int spacing;
 
         public string Name
         {
@@ -41,11 +42,20 @@ namespace AbrFileTypePlugin
             }
         }
 
-        public SampledBrush(string name, string tag, int diameter)
+        public int Spacing
+        {
+            get
+            {
+                return this.spacing;
+            }
+        }
+
+        public SampledBrush(string name, string tag, int diameter, int spacing)
         {
             this.name = name;
             this.tag = tag;
             this.diameter = diameter;
+            this.spacing = spacing;
         }
     }
 }

@@ -264,7 +264,7 @@ namespace AbrFileTypePlugin
 
             if (brushData != null && !string.IsNullOrEmpty(brushData.sampledDataTag))
             {
-                this.sampledBrushes.Add(new SampledBrush(presetName, brushData.sampledDataTag, brushData.diameter));
+                this.sampledBrushes.Add(new SampledBrush(presetName, brushData.sampledDataTag, brushData.diameter, brushData.spacing));
             }
         }
 
@@ -330,6 +330,13 @@ namespace AbrFileTypePlugin
                         if (unitFloat.type == UnitTypes.Pixel)
                         {
                             data.diameter = (int)unitFloat.value;
+                        }
+                        break;
+                    case "Spcn":
+                        unitFloat = ParseUnitFloat(reader);
+                        if (unitFloat.type == UnitTypes.Percent)
+                        {
+                            data.spacing = (int)unitFloat.value;
                         }
                         break;
                     case "sampledData":
@@ -441,6 +448,7 @@ namespace AbrFileTypePlugin
         private sealed class BrushData
         {
             public int diameter;
+            public int spacing;
             public string sampledDataTag;
         }
 

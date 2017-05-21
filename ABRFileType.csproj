@@ -54,6 +54,7 @@
   <ItemGroup>
     <Compile Include="AbrFileTypeFactory.cs" />
     <Compile Include="AbrImageCompression.cs" />
+    <Compile Include="AbrMetadataNames.cs" />
     <Compile Include="BinaryReverseWriter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LengthWriter.cs" />

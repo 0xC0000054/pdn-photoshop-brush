@@ -12,6 +12,7 @@
 using PaintDotNet;
 using System;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 
 namespace AbrFileTypePlugin
@@ -59,7 +60,17 @@ namespace AbrFileTypePlugin
                 writer.Write(0);
 
                 // Write the spacing.
-                writer.Write((short)DefaultSpacingPercent);
+                string spacingMetaData = layer.Metadata.GetUserValue(AbrMetadataNames.BrushSpacing);
+
+                if (spacingMetaData != null &&
+                    int.TryParse(spacingMetaData, NumberStyles.Number, CultureInfo.InvariantCulture, out int spacing))
+                {
+                    writer.Write((short)spacing);
+                }
+                else
+                {
+                    writer.Write((short)DefaultSpacingPercent); 
+                }
 
                 // Write the brush name, if applicable.
                 if (fileVersion == AbrFileVersion.Version2)

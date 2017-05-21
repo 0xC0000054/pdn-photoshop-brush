@@ -93,6 +93,7 @@ namespace AbrFileTypePlugin
 							tempLayer = new BitmapLayer(maxWidth, maxHeight);
 							tempLayer.IsBackground = i == 0;
 							tempLayer.Name = !string.IsNullOrEmpty(abr.Name) ? abr.Name : string.Format(CultureInfo.CurrentCulture, Resources.BrushNameFormat, i);
+							tempLayer.Metadata.SetUserValue(AbrMetadataNames.BrushSpacing, abr.Spacing.ToString(CultureInfo.InvariantCulture));
 
 							tempLayer.Surface.CopySurface(abr.Surface);
 							layer = tempLayer;
@@ -247,7 +248,7 @@ namespace AbrFileTypePlugin
 
 					} while (rowsRemaining > 0);
 
-					brushes.Add(CreateSampledBrush(width, height, depth, alphaData, name));
+					brushes.Add(CreateSampledBrush(width, height, depth, alphaData, name, spacing));
 				}
 				else
 				{
@@ -369,7 +370,7 @@ namespace AbrFileTypePlugin
 							alphaData = reader.ReadBytes(alphaDataSize);
 						}
 
-						var brush = CreateSampledBrush(width, height, depth, alphaData, sampledBrush.Name);
+						var brush = CreateSampledBrush(width, height, depth, alphaData, sampledBrush.Name, sampledBrush.Spacing);
 
 						brushes.Add(brush);
 
@@ -384,7 +385,7 @@ namespace AbrFileTypePlugin
 							{
 								Size size = ComputeBrushSize(originalWidth, originalHeight, item.Diameter);
 
-								Brush scaledBrush = new Brush(size.Width, size.Height, item.Name);
+								Brush scaledBrush = new Brush(size.Width, size.Height, item.Name, item.Spacing);
 								scaledBrush.Surface.FitSurface(ResamplingAlgorithm.SuperSampling, brush.Surface);
 
 								brushes.Add(scaledBrush);
@@ -404,14 +405,14 @@ namespace AbrFileTypePlugin
 			return brushes.AsReadOnly();
 		}
 
-		private static unsafe Brush CreateSampledBrush(int width, int height, int depth, byte[] alphaData, string name)
+		private static unsafe Brush CreateSampledBrush(int width, int height, int depth, byte[] alphaData, string name, int spacing)
 		{
 			Brush brush = null;
 			Brush tempBrush = null;
 
 			try
 			{
-				tempBrush = new Brush(width, height, name);
+				tempBrush = new Brush(width, height, name, spacing);
 				Surface surface = tempBrush.Surface;
 
 				fixed (byte* ptr = alphaData)
@@ -505,11 +506,13 @@ namespace AbrFileTypePlugin
 		{
 			private Surface surface;
 			private readonly string name;
+			private readonly int spacing;
 
-			public Brush(int width, int height, string name)
+			public Brush(int width, int height, string name, int spacing)
 			{
 				this.surface = new Surface(width, height);
 				this.name = name;
+				this.spacing = spacing;
 			}
 
 			public Surface Surface
@@ -525,6 +528,14 @@ namespace AbrFileTypePlugin
 				get
 				{
 					return this.name;
+				}
+			}
+
+			public int Spacing
+			{
+				get
+				{
+					return this.spacing;
 				}
 			}
 
