@@ -5,7 +5,13 @@ A [Paint.NET](http://www.getpaint.net) FileType plugin that loads and saves Adob
 ## How to install the plugin
 
 1. Close Paint.NET.
-2. Place ABRFileType.dll in the Paint.NET FileTypes folder (usually C:\Program Files\Paint.NET\FileTypes).
+2. Place ABRFileType.dll in the Paint.NET FileTypes folder which is usually located in one the following locations depending on the Paint.NET version you have installed.
+
+  Paint.NET Version |  FileTypes Folder Location
+  --------|----------
+  Classic | C:\Program Files\Paint.NET\FileTypes    
+  Microsoft Store | My Documents\paint.net App Files\FileTypes
+  
 3. Restart Paint.NET.
 
 ## License
