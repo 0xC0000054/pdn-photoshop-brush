@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////////
 //
 // ABR FileType Plugin for Paint.NET
-// 
+//
 // This software is provided under the MIT License:
 //   Copyright (c) 2012-2017 Nicholas Hayes
 //
@@ -40,12 +40,12 @@ namespace AbrFileTypePlugin
         public LengthWriter(BinaryReverseWriter writer)
         {
             this.writer = writer;
-            // we will write the correct length later, so remember 
+            // we will write the correct length later, so remember
             // the position
             this.lengthFieldOffset = writer.BaseStream.Position;
             writer.Write(0xFEEDFEED);
 
-            // remember the start  position for calculation Image 
+            // remember the start  position for calculation Image
             // resources length
             this.startPosition = writer.BaseStream.Position;
             this.disposed = false;

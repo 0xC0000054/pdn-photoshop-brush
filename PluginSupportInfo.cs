@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////////
 //
 // ABR FileType Plugin for Paint.NET
-// 
+//
 // This software is provided under the MIT License:
 //   Copyright (c) 2012-2017 Nicholas Hayes
 //
@@ -19,7 +19,7 @@ namespace AbrFileTypePlugin
     {
         public string Author
         {
-            get 
+            get
             {
                 return "null54";
             }
@@ -29,7 +29,7 @@ namespace AbrFileTypePlugin
         {
             get
             {
-                return ((AssemblyCopyrightAttribute)typeof(AbrFileType).Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright; 
+                return ((AssemblyCopyrightAttribute)typeof(AbrFileType).Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright;
             }
         }
 
@@ -43,7 +43,7 @@ namespace AbrFileTypePlugin
 
         public Version Version
         {
-            get 
+            get
             {
                 return typeof(AbrFileType).Assembly.GetName().Version;
             }
@@ -51,7 +51,7 @@ namespace AbrFileTypePlugin
 
         public Uri WebsiteUri
         {
-            get 
+            get
             {
                 return new Uri("https://forums.getpaint.net/index.php?/topic/25792-photoshop-brush-filetype/");
             }

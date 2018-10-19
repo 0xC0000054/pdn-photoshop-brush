@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////////
 //
 // ABR FileType Plugin for Paint.NET
-// 
+//
 // This software is provided under the MIT License:
 //   Copyright (c) 2012-2017 Nicholas Hayes
 //
@@ -399,7 +399,7 @@ namespace AbrFileTypePlugin
 					{
 						reader.BaseStream.Position += remaining;
 					}
-				} 
+				}
 			}
 
 			return brushes.AsReadOnly();

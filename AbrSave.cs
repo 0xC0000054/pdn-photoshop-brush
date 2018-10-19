@@ -1,7 +1,7 @@
 ﻿/////////////////////////////////////////////////////////////////////////////////
 //
 // ABR FileType Plugin for Paint.NET
-// 
+//
 // This software is provided under the MIT License:
 //   Copyright (c) 2012-2017 Nicholas Hayes
 //
@@ -69,7 +69,7 @@ namespace AbrFileTypePlugin
                 }
                 else
                 {
-                    writer.Write((short)DefaultSpacingPercent); 
+                    writer.Write((short)DefaultSpacingPercent);
                 }
 
                 // Write the brush name, if applicable.
@@ -115,7 +115,7 @@ namespace AbrFileTypePlugin
                         long rowCountOffset = writer.BaseStream.Position;
 
                         for (int i = 0; i < chunkHeight; i++)
-                        { 
+                        {
                             // Placeholder for the row byte count.
                             writer.Write(short.MaxValue);
                         }
@@ -172,7 +172,7 @@ namespace AbrFileTypePlugin
                 for (int x = 0; x < surface.Width; x++)
                 {
                     // Get the smallest rectangle containing image data.
-                    if (p->A > 0) 
+                    if (p->A > 0)
                     {
                         if (y < top)
                         {
