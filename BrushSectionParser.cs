@@ -39,7 +39,7 @@ namespace AbrFileTypePlugin
 
             if (this.sectionOffsets != null && this.sectionOffsets.descriptorSectionOffset >= 0)
             {
-                reader.BaseStream.Position = this.sectionOffsets.descriptorSectionOffset;
+                reader.Position = this.sectionOffsets.descriptorSectionOffset;
                 ParseBrushDescriptorSection(reader);
             }
         }
@@ -109,7 +109,7 @@ namespace AbrFileTypePlugin
             long sampleSectionOffset = -1;
             long descriptorSectionOffset = -1;
 
-            while (reader.BaseStream.Position < reader.BaseStream.Length)
+            while (reader.Position < reader.Length)
             {
                 uint sig = reader.ReadUInt32();
 
@@ -123,10 +123,10 @@ namespace AbrFileTypePlugin
                 switch (sectionId)
                 {
                     case SampleSectionId:
-                        sampleSectionOffset = reader.BaseStream.Position;
+                        sampleSectionOffset = reader.Position;
                         break;
                     case DescriptorSectionId:
-                        descriptorSectionOffset = reader.BaseStream.Position;
+                        descriptorSectionOffset = reader.Position;
                         break;
                     default:
                         break;
@@ -134,7 +134,7 @@ namespace AbrFileTypePlugin
 
                 uint size = reader.ReadUInt32();
 
-                reader.BaseStream.Position += size;
+                reader.Position += size;
             }
 
             return new BrushSectionOffsets(sampleSectionOffset, descriptorSectionOffset);
@@ -144,11 +144,11 @@ namespace AbrFileTypePlugin
         {
             uint sectionSize = reader.ReadUInt32();
 
-            long sectionEnd = reader.BaseStream.Position + sectionSize;
+            long sectionEnd = reader.Position + sectionSize;
             // Skip the unknown data.
-            reader.BaseStream.Position += 22L;
+            reader.Position += 22L;
 
-            if (reader.BaseStream.Position < sectionEnd)
+            if (reader.Position < sectionEnd)
             {
                 string key = ParseKey(reader);
                 DescriptorTypes type = (DescriptorTypes)reader.ReadUInt32();
@@ -157,7 +157,7 @@ namespace AbrFileTypePlugin
                 System.Diagnostics.Debug.WriteLine(string.Format(
                     CultureInfo.CurrentCulture,
                     "Item: {0} ({1}) at {2:X8}",
-                    new object[] { key, type, reader.BaseStream.Position }));
+                    new object[] { key, type, reader.Position }));
 #endif
 
                 ParseType(reader, type);
@@ -225,7 +225,7 @@ namespace AbrFileTypePlugin
                     System.Diagnostics.Debug.WriteLine(string.Format(
                         CultureInfo.CurrentCulture,
                         "Item {0}: {1} ({2}) at 0x{3:X8}",
-                        new object[] { i, key, type, reader.BaseStream.Position }));
+                        new object[] { i, key, type, reader.Position }));
 #endif
                     ParseType(reader, type);
                 }
@@ -246,7 +246,7 @@ namespace AbrFileTypePlugin
                 System.Diagnostics.Debug.WriteLine(string.Format(
                     CultureInfo.CurrentCulture,
                     "brushPreset item {0}: {1} ({2}) at 0x{3:X8}",
-                    new object[] { i, key, type, reader.BaseStream.Position }));
+                    new object[] { i, key, type, reader.Position }));
 #endif
                 if (key.Equals("Nm  ", StringComparison.Ordinal))
                 {
@@ -297,7 +297,7 @@ namespace AbrFileTypePlugin
                     System.Diagnostics.Debug.WriteLine(string.Format(
                         CultureInfo.CurrentCulture,
                         "{0} item {1}: {2} ({3}) at 0x{4:X8}",
-                        new object[] { classId, i, key, type, reader.BaseStream.Position }));
+                        new object[] { classId, i, key, type, reader.Position }));
 #endif
                     ParseType(reader, type);
                 }
@@ -320,7 +320,7 @@ namespace AbrFileTypePlugin
                 System.Diagnostics.Debug.WriteLine(string.Format(
                     CultureInfo.CurrentCulture,
                     "sampledBrush item {0}: {1} ({2}) at 0x{3:X8}",
-                    new object[] { i, key, type, reader.BaseStream.Position }));
+                    new object[] { i, key, type, reader.Position }));
 #endif
                 UnitFloat unitFloat;
                 switch (key)

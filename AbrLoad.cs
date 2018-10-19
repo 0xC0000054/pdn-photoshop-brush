@@ -138,7 +138,7 @@ namespace AbrFileTypePlugin
 				AbrBrushType type = (AbrBrushType)reader.ReadInt16();
 				int size = reader.ReadInt32();
 
-				long endOffset = reader.BaseStream.Position + size;
+				long endOffset = reader.Position + size;
 
 #if DEBUG
 				System.Diagnostics.Debug.WriteLine(string.Format(CultureInfo.CurrentCulture, "Brush: {0}, type: {1}, size: {2} bytes", i, type, size));
@@ -160,7 +160,7 @@ namespace AbrFileTypePlugin
 					short angle = reader.ReadInt16();
 					short hardness = reader.ReadInt16();
 #else
-					reader.BaseStream.Position += size;
+					reader.Position += size;
 #endif
 				}
 				else if (type == AbrBrushType.Sampled)
@@ -177,13 +177,13 @@ namespace AbrFileTypePlugin
 					bool antiAlias = reader.ReadByte() != 0;
 
 					// Skip the Int16 bounds.
-					reader.BaseStream.Position += 8L;
+					reader.Position += 8L;
 
 					Rectangle bounds = reader.ReadInt32Rectangle();
 					if (bounds.Width <= 0 || bounds.Height <= 0)
 					{
 						// Skip any brushes that have invalid dimensions.
-						reader.BaseStream.Position += (endOffset - reader.BaseStream.Position);
+						reader.Position += (endOffset - reader.Position);
 						continue;
 					}
 
@@ -192,7 +192,7 @@ namespace AbrFileTypePlugin
 					if (depth != 8)
 					{
 						// The format specs state that brushes must be 8-bit, skip any that are not.
-						reader.BaseStream.Position += (endOffset - reader.BaseStream.Position);
+						reader.Position += (endOffset - reader.Position);
 						continue;
 					}
 					int height = bounds.Height;
@@ -253,7 +253,7 @@ namespace AbrFileTypePlugin
 				else
 				{
 					// Skip any unknown brush types.
-					reader.BaseStream.Position += size;
+					reader.Position += size;
 				}
 			}
 
@@ -287,31 +287,31 @@ namespace AbrFileTypePlugin
 
 			if (parser.SampledBrushes.Count > 0 && sampleSectionOffset >= 0)
 			{
-				reader.BaseStream.Position = sampleSectionOffset;
+				reader.Position = sampleSectionOffset;
 
 				uint sectionLength = reader.ReadUInt32();
 
-				long sectionEnd = reader.BaseStream.Position + sectionLength;
+				long sectionEnd = reader.Position + sectionLength;
 
-				while (reader.BaseStream.Position < sectionEnd)
+				while (reader.Position < sectionEnd)
 				{
 					uint brushLength = reader.ReadUInt32();
 
 					// The brush data is padded to 4 byte alignment.
 					long paddedBrushLength = ((long)brushLength + 3) & ~3;
 
-					long endOffset = reader.BaseStream.Position + paddedBrushLength;
+					long endOffset = reader.Position + paddedBrushLength;
 
 					string tag = reader.ReadPascalString();
 
 					// Skip the unneeded data that comes before the Int32 bounds rectangle.
-					reader.BaseStream.Position += unusedDataLength;
+					reader.Position += unusedDataLength;
 
 					Rectangle bounds = reader.ReadInt32Rectangle();
 					if (bounds.Width <= 0 || bounds.Height <= 0)
 					{
 						// Skip any brushes that have invalid dimensions.
-						reader.BaseStream.Position += (endOffset - reader.BaseStream.Position);
+						reader.Position += (endOffset - reader.Position);
 						continue;
 					}
 
@@ -319,7 +319,7 @@ namespace AbrFileTypePlugin
 					if (depth != 8 && depth != 16)
 					{
 						// Skip any brushes with an unknown bit depth.
-						reader.BaseStream.Position += (endOffset - reader.BaseStream.Position);
+						reader.Position += (endOffset - reader.Position);
 						continue;
 					}
 
@@ -393,11 +393,11 @@ namespace AbrFileTypePlugin
 						}
 					}
 
-					long remaining = endOffset - reader.BaseStream.Position;
+					long remaining = endOffset - reader.Position;
 					// Skip any remaining bytes until the next sampled brush.
 					if (remaining > 0)
 					{
-						reader.BaseStream.Position += remaining;
+						reader.Position += remaining;
 					}
 				}
 			}
