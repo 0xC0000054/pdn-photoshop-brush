@@ -55,7 +55,7 @@
     <Compile Include="AbrFileTypeFactory.cs" />
     <Compile Include="AbrImageCompression.cs" />
     <Compile Include="AbrMetadataNames.cs" />
-    <Compile Include="BinaryReverseWriter.cs" />
+    <Compile Include="BigEndianBinaryWriter.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="LengthWriter.cs" />
     <Compile Include="AbrBrushType.cs" />
@@ -63,7 +63,7 @@
     <Compile Include="AbrFileType.cs" />
     <Compile Include="AbrSave.cs" />
     <Compile Include="AbrFileVersion.cs" />
-    <Compile Include="BinaryReverseReader.cs" />
+    <Compile Include="BigEndianBinaryReader.cs" />
     <Compile Include="BrushSectionParser.cs" />
     <Compile Include="PluginSupportInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

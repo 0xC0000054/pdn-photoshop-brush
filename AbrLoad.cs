@@ -35,7 +35,7 @@ namespace AbrFileTypePlugin
 	{
 		public static Document Load(Stream stream)
 		{
-			using (BinaryReverseReader reader = new BinaryReverseReader(stream))
+			using (BigEndianBinaryReader reader = new BigEndianBinaryReader(stream))
 			{
 				ReadOnlyCollection<Brush> brushes;
 				short version = reader.ReadInt16();
@@ -127,7 +127,7 @@ namespace AbrFileTypePlugin
 			}
 		}
 
-		private static ReadOnlyCollection<Brush> DecodeVersion1(BinaryReverseReader reader, short version)
+		private static ReadOnlyCollection<Brush> DecodeVersion1(BigEndianBinaryReader reader, short version)
 		{
 			short count = reader.ReadInt16();
 
@@ -260,7 +260,7 @@ namespace AbrFileTypePlugin
 			return brushes.AsReadOnly();
 		}
 
-		private static ReadOnlyCollection<Brush> DecodeVersion6(BinaryReverseReader reader, short majorVersion)
+		private static ReadOnlyCollection<Brush> DecodeVersion6(BigEndianBinaryReader reader, short majorVersion)
 		{
 			short minorVersion = reader.ReadInt16();
 			long unusedDataLength;

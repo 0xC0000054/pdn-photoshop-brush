@@ -32,7 +32,7 @@ namespace AbrFileTypePlugin
             double progressPercentage = 0.0;
             double progressDelta = (1.0 / input.Layers.Count) * 100.0;
 
-            using (BinaryReverseWriter writer = new BinaryReverseWriter(output, true))
+            using (BigEndianBinaryWriter writer = new BigEndianBinaryWriter(output, true))
             {
                 writer.Write((short)fileVersion);
                 writer.Write((short)input.Layers.Count);
@@ -50,7 +50,7 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private static void SaveLayer(BinaryReverseWriter writer, BitmapLayer layer, AbrFileVersion fileVersion, bool rle)
+        private static void SaveLayer(BigEndianBinaryWriter writer, BitmapLayer layer, AbrFileVersion fileVersion, bool rle)
         {
             writer.Write((short)AbrBrushType.Sampled);
 

@@ -34,10 +34,10 @@ namespace AbrFileTypePlugin
     {
         private readonly long lengthFieldOffset;
         private readonly long startPosition;
-        private BinaryReverseWriter writer;
+        private BigEndianBinaryWriter writer;
         private bool disposed;
 
-        public LengthWriter(BinaryReverseWriter writer)
+        public LengthWriter(BigEndianBinaryWriter writer)
         {
             this.writer = writer;
             // we will write the correct length later, so remember

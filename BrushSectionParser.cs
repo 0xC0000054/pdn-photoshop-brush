@@ -32,7 +32,7 @@ namespace AbrFileTypePlugin
         /// Initializes a new instance of the <see cref="BrushSectionParser"/> class.
         /// </summary>
         /// <param name="reader">The reader.</param>
-        public BrushSectionParser(BinaryReverseReader reader)
+        public BrushSectionParser(BigEndianBinaryReader reader)
         {
             this.sectionOffsets = GetBrushSectionOffsets(reader);
             this.sampledBrushes = new SampledBrushCollection();
@@ -104,7 +104,7 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private static BrushSectionOffsets GetBrushSectionOffsets(BinaryReverseReader reader)
+        private static BrushSectionOffsets GetBrushSectionOffsets(BigEndianBinaryReader reader)
         {
             long sampleSectionOffset = -1;
             long descriptorSectionOffset = -1;
@@ -140,7 +140,7 @@ namespace AbrFileTypePlugin
             return new BrushSectionOffsets(sampleSectionOffset, descriptorSectionOffset);
         }
 
-        private void ParseBrushDescriptorSection(BinaryReverseReader reader)
+        private void ParseBrushDescriptorSection(BigEndianBinaryReader reader)
         {
             uint sectionSize = reader.ReadUInt32();
 
@@ -164,7 +164,7 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private static string ParseKey(BinaryReverseReader reader)
+        private static string ParseKey(BigEndianBinaryReader reader)
         {
             int length = reader.ReadInt32();
             if (length == 0)
@@ -177,7 +177,7 @@ namespace AbrFileTypePlugin
             return Encoding.ASCII.GetString(bytes);
         }
 
-        private static string ParseClassId(BinaryReverseReader reader)
+        private static string ParseClassId(BigEndianBinaryReader reader)
         {
             int length = reader.ReadInt32();
             if (length == 0)
@@ -188,7 +188,7 @@ namespace AbrFileTypePlugin
             return Encoding.ASCII.GetString(reader.ReadBytes(length)).TrimEnd('\0');
         }
 
-        private void ParseList(BinaryReverseReader reader)
+        private void ParseList(BigEndianBinaryReader reader)
         {
             uint count = reader.ReadUInt32();
             for (int i = 0; i < count; i++)
@@ -199,7 +199,7 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private void ParseDescriptor(BinaryReverseReader reader)
+        private void ParseDescriptor(BigEndianBinaryReader reader)
         {
             string name = ParseString(reader);
 
@@ -232,7 +232,7 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private void ParseBrushPreset(BinaryReverseReader reader, uint count)
+        private void ParseBrushPreset(BigEndianBinaryReader reader, uint count)
         {
             string presetName = null;
             BrushData brushData = null;
@@ -268,7 +268,7 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private BrushData ParseBrushDescriptor(BinaryReverseReader reader)
+        private BrushData ParseBrushDescriptor(BigEndianBinaryReader reader)
         {
             string name = ParseString(reader);
 
@@ -306,7 +306,7 @@ namespace AbrFileTypePlugin
             return data;
         }
 
-        private BrushData ParseSampledBrush(BinaryReverseReader reader, uint count)
+        private BrushData ParseSampledBrush(BigEndianBinaryReader reader, uint count)
         {
             BrushData data = new BrushData();
 
@@ -351,12 +351,12 @@ namespace AbrFileTypePlugin
             return data;
         }
 
-        private static string ParseString(BinaryReverseReader reader)
+        private static string ParseString(BigEndianBinaryReader reader)
         {
             return reader.ReadUnicodeString();
         }
 
-        private static UnitFloat ParseUnitFloat(BinaryReverseReader reader)
+        private static UnitFloat ParseUnitFloat(BigEndianBinaryReader reader)
         {
             UnitFloat value = new UnitFloat()
             {
@@ -367,28 +367,28 @@ namespace AbrFileTypePlugin
             return value;
         }
 
-        private static bool ParseBoolean(BinaryReverseReader reader)
+        private static bool ParseBoolean(BigEndianBinaryReader reader)
         {
             bool value = reader.ReadByte() != 0;
 
             return value;
         }
 
-        private static uint ParseInteger(BinaryReverseReader reader)
+        private static uint ParseInteger(BigEndianBinaryReader reader)
         {
             uint value = reader.ReadUInt32();
 
             return value;
         }
 
-        private static double ParseFloat(BinaryReverseReader reader)
+        private static double ParseFloat(BigEndianBinaryReader reader)
         {
             double value = reader.ReadDouble();
 
             return value;
         }
 
-        private static EnumeratedValue ParseEnumerated(BinaryReverseReader reader)
+        private static EnumeratedValue ParseEnumerated(BigEndianBinaryReader reader)
         {
             EnumeratedValue value = new EnumeratedValue()
             {
@@ -399,7 +399,7 @@ namespace AbrFileTypePlugin
             return value;
         }
 
-        private void ParseType(BinaryReverseReader reader, DescriptorTypes type)
+        private void ParseType(BigEndianBinaryReader reader, DescriptorTypes type)
         {
             switch (type)
             {

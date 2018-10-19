@@ -32,9 +32,9 @@ using System.Text;
 
 namespace AbrFileTypePlugin
 {
-    internal sealed class BinaryReverseReader : BinaryReader
+    internal sealed class BigEndianBinaryReader : BinaryReader
     {
-        public BinaryReverseReader(Stream stream) : base(stream)
+        public BigEndianBinaryReader(Stream stream) : base(stream)
         {
         }
 

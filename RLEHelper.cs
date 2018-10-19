@@ -153,7 +153,7 @@ namespace AbrFileTypePlugin
 
         ////////////////////////////////////////////////////////////////////////
 
-        public static void DecodedRow(BinaryReverseReader reader, byte[] imgData, int startIdx, int columns)
+        public static void DecodedRow(BigEndianBinaryReader reader, byte[] imgData, int startIdx, int columns)
         {
             int count = 0;
             while (count < columns)

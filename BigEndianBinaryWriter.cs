@@ -32,11 +32,11 @@ using System.Text;
 
 namespace AbrFileTypePlugin
 {
-    internal sealed class BinaryReverseWriter : BinaryWriter
+    internal sealed class BigEndianBinaryWriter : BinaryWriter
     {
         private bool leaveOpen;
 
-        public BinaryReverseWriter(Stream stream, bool leaveOpen) : base(stream)
+        public BigEndianBinaryWriter(Stream stream, bool leaveOpen) : base(stream)
         {
             this.leaveOpen = leaveOpen;
         }
