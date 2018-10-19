@@ -34,7 +34,7 @@ namespace AbrFileTypePlugin
 {
     internal sealed class BigEndianBinaryWriter : BinaryWriter
     {
-        private bool leaveOpen;
+        private readonly bool leaveOpen;
 
         public BigEndianBinaryWriter(Stream stream, bool leaveOpen) : base(stream)
         {
