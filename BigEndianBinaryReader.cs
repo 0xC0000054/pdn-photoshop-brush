@@ -199,7 +199,11 @@ namespace AbrFileTypePlugin
                 readOffset = 0;
                 readLength = 0;
 
-                return stream.Read(bytes, offset + bytesUnread, count - bytesUnread);
+                int totalBytesRead = bytesUnread;
+
+                totalBytesRead += stream.Read(bytes, offset + bytesUnread, count - bytesUnread);
+
+                return totalBytesRead;
             }
         }
 
