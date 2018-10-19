@@ -178,7 +178,7 @@ namespace AbrFileTypePlugin
                 return 0;
             }
 
-            if ((readOffset + count) < readLength)
+            if ((readOffset + count) <= readLength)
             {
                 Buffer.BlockCopy(buffer, readOffset, bytes, offset, count);
                 readOffset += count;
@@ -257,7 +257,7 @@ namespace AbrFileTypePlugin
 
             byte[] bytes = new byte[count];
 
-            if ((readOffset + count) < readLength)
+            if ((readOffset + count) <= readLength)
             {
                 Buffer.BlockCopy(buffer, readOffset, bytes, 0, count);
                 readOffset += count;
