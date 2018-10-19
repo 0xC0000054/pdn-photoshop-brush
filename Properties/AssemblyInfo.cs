@@ -3,7 +3,7 @@
 // ABR FileType Plugin for Paint.NET
 //
 // This software is provided under the MIT License:
-//   Copyright (c) 2012-2017 Nicholas Hayes
+//   Copyright (c) 2012-2018 Nicholas Hayes
 //
 // See LICENSE.txt for complete licensing and attribution information.
 //
@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("null54")]
 [assembly: AssemblyProduct("ABRFileType")]
-[assembly: AssemblyCopyright("Copyright © 2012-2017 Nicholas Hayes (aka null54)")]
+[assembly: AssemblyCopyright("Copyright © 2012-2018 Nicholas Hayes (aka null54)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
