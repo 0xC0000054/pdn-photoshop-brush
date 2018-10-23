@@ -226,13 +226,12 @@ namespace AbrFileTypePlugin
 						}
 						else
 						{
-							int rowByteOffset = rowsRead * width;
 							int numBytesToRead = chunkHeight * width;
-							int numBytesRead = 0;
+							int numBytesRead = rowsRead * width;
 							while (numBytesToRead > 0)
 							{
 								// Read may return anything from 0 to numBytesToRead.
-								int n = reader.Read(alphaData, rowByteOffset + numBytesRead, numBytesToRead);
+								int n = reader.Read(alphaData, numBytesRead, numBytesToRead);
 								// The end of the file is reached.
 								if (n == 0)
 								{
