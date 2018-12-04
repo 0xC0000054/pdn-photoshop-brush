@@ -120,7 +120,7 @@ namespace AbrFileTypePlugin
                     long newOffset = readOffset + diff;
 
                     // Avoid reading from the stream if the offset is within the current buffer.
-                    if (newOffset >= 0 && newOffset < readLength)
+                    if (newOffset >= 0 && newOffset <= readLength)
                     {
                         readOffset = (int)newOffset;
                     }
