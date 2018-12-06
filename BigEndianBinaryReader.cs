@@ -312,7 +312,7 @@ namespace AbrFileTypePlugin
         /// <summary>
         /// Reads a 2-byte signed integer in big endian byte order.
         /// </summary>
-        /// <returns>The 4-byte signed integer.</returns>
+        /// <returns>The 2-byte signed integer.</returns>
         /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public short ReadInt16()
