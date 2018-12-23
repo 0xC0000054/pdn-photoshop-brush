@@ -430,7 +430,6 @@ namespace AbrFileTypePlugin
                 default:
                     throw new FormatException(string.Format(CultureInfo.CurrentCulture, "Unsupported brush descriptor type: '{0}'", DescriptorTypeToString(type)));
             }
-
         }
 
         private static string DescriptorTypeToString(DescriptorTypes type)

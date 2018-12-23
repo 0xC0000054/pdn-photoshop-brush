@@ -154,7 +154,6 @@ namespace AbrFileTypePlugin
                     rowsRead += 16384;
 
                 } while (rowsRemaining > 0);
-
             }
         }
 

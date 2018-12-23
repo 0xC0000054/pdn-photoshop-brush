@@ -190,7 +190,6 @@ namespace AbrFileTypePlugin
                     }
                 }
             }
-
         }
     }
 }
