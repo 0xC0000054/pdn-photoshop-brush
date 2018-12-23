@@ -210,12 +210,12 @@ namespace AbrFileTypePlugin
 
             fixed (byte* ptr = alpha)
             {
-                for (int y = imageBounds.Top; y < imageBounds.Bottom; y++)
+                for (int y = 0; y < imageBounds.Height; y++)
                 {
-                    ColorBgra* src = surface.GetPointAddressUnchecked(imageBounds.Left, y);
+                    ColorBgra* src = surface.GetPointAddressUnchecked(imageBounds.Left, imageBounds.Top + y);
                     byte* dst = ptr + (y * imageBounds.Width);
 
-                    for (int x = imageBounds.Left; x < imageBounds.Right; x++)
+                    for (int x = 0; x < imageBounds.Width; x++)
                     {
                         *dst = src->A;
 
