@@ -58,10 +58,10 @@ namespace AbrFileTypePlugin
                 long endPosition = this.writer.BaseStream.Position;
                 long length = endPosition - this.startPosition;
 
-                writer.BaseStream.Position = this.lengthFieldOffset;
-                writer.Write((uint)length);
+                this.writer.BaseStream.Position = this.lengthFieldOffset;
+                this.writer.Write((uint)length);
 
-                writer.BaseStream.Position = endPosition;
+                this.writer.BaseStream.Position = endPosition;
 
                 this.disposed = true;
             }

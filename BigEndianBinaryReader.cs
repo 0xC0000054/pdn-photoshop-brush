@@ -55,10 +55,10 @@ namespace AbrFileTypePlugin
         public BigEndianBinaryReader(Stream stream)
         {
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            bufferSize = (int)Math.Min(stream.Length, MaxBufferSize);
-            buffer = new byte[bufferSize];
-            readOffset = 0;
-            readLength = 0;
+            this.bufferSize = (int)Math.Min(stream.Length, MaxBufferSize);
+            this.buffer = new byte[this.bufferSize];
+            this.readOffset = 0;
+            this.readLength = 0;
         }
 
         /// <summary>
@@ -72,12 +72,12 @@ namespace AbrFileTypePlugin
         {
             get
             {
-                if (stream == null)
+                if (this.stream == null)
                 {
                     throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
                 }
 
-                return stream.Length;
+                return this.stream.Length;
             }
         }
 
@@ -93,12 +93,12 @@ namespace AbrFileTypePlugin
         {
             get
             {
-                if (stream == null)
+                if (this.stream == null)
                 {
                     throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
                 }
 
-                return stream.Position - readLength + readOffset;
+                return this.stream.Position - this.readLength + this.readOffset;
             }
             set
             {
@@ -106,30 +106,30 @@ namespace AbrFileTypePlugin
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
-                if (stream == null)
+                if (this.stream == null)
                 {
                     throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
                 }
 
-                long current = Position;
+                long current = this.Position;
 
                 if (value != current)
                 {
                     long diff = value - current;
 
-                    long newOffset = readOffset + diff;
+                    long newOffset = this.readOffset + diff;
 
                     // Avoid reading from the stream if the offset is within the current buffer.
-                    if (newOffset >= 0 && newOffset <= readLength)
+                    if (newOffset >= 0 && newOffset <= this.readLength)
                     {
-                        readOffset = (int)newOffset;
+                        this.readOffset = (int)newOffset;
                     }
                     else
                     {
                         // Invalidate the existing buffer.
-                        readOffset = 0;
-                        readLength = 0;
-                        stream.Seek(value, SeekOrigin.Begin);
+                        this.readOffset = 0;
+                        this.readLength = 0;
+                        this.stream.Seek(value, SeekOrigin.Begin);
                     }
                 }
             }
@@ -140,10 +140,10 @@ namespace AbrFileTypePlugin
         /// </summary>
         public void Dispose()
         {
-            if (stream != null)
+            if (this.stream != null)
             {
-                stream.Dispose();
-                stream = null;
+                this.stream.Dispose();
+                this.stream = null;
             }
         }
 
@@ -168,7 +168,7 @@ namespace AbrFileTypePlugin
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
@@ -178,30 +178,30 @@ namespace AbrFileTypePlugin
                 return 0;
             }
 
-            if ((readOffset + count) <= readLength)
+            if ((this.readOffset + count) <= this.readLength)
             {
-                Buffer.BlockCopy(buffer, readOffset, bytes, offset, count);
-                readOffset += count;
+                Buffer.BlockCopy(this.buffer, this.readOffset, bytes, offset, count);
+                this.readOffset += count;
 
                 return count;
             }
             else
             {
                 // Ensure that any bytes at the end of the current buffer are included.
-                int bytesUnread = readLength - readOffset;
+                int bytesUnread = this.readLength - this.readOffset;
 
                 if (bytesUnread > 0)
                 {
-                    Buffer.BlockCopy(buffer, readOffset, bytes, 0, bytesUnread);
+                    Buffer.BlockCopy(this.buffer, this.readOffset, bytes, 0, bytesUnread);
                 }
 
                 // Invalidate the existing buffer.
-                readOffset = 0;
-                readLength = 0;
+                this.readOffset = 0;
+                this.readLength = 0;
 
                 int totalBytesRead = bytesUnread;
 
-                totalBytesRead += stream.Read(bytes, offset + bytesUnread, count - bytesUnread);
+                totalBytesRead += this.stream.Read(bytes, offset + bytesUnread, count - bytesUnread);
 
                 return totalBytesRead;
             }
@@ -215,18 +215,18 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public byte ReadByte()
         {
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
 
-            if ((readOffset + sizeof(byte)) > readLength)
+            if ((this.readOffset + sizeof(byte)) > this.readLength)
             {
                 FillBuffer(sizeof(byte));
             }
 
-            byte val = buffer[readOffset];
-            readOffset += sizeof(byte);
+            byte val = this.buffer[this.readOffset];
+            this.readOffset += sizeof(byte);
 
             return val;
         }
@@ -245,7 +245,7 @@ namespace AbrFileTypePlugin
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
@@ -257,26 +257,26 @@ namespace AbrFileTypePlugin
 
             byte[] bytes = new byte[count];
 
-            if ((readOffset + count) <= readLength)
+            if ((this.readOffset + count) <= this.readLength)
             {
-                Buffer.BlockCopy(buffer, readOffset, bytes, 0, count);
-                readOffset += count;
+                Buffer.BlockCopy(this.buffer, this.readOffset, bytes, 0, count);
+                this.readOffset += count;
             }
             else
             {
                 // Ensure that any bytes at the end of the current buffer are included.
-                int bytesUnread = readLength - readOffset;
+                int bytesUnread = this.readLength - this.readOffset;
 
                 if (bytesUnread > 0)
                 {
-                    Buffer.BlockCopy(buffer, readOffset, bytes, 0, bytesUnread);
+                    Buffer.BlockCopy(this.buffer, this.readOffset, bytes, 0, bytesUnread);
                 }
 
                 int numBytesToRead = count - bytesUnread;
                 int numBytesRead = bytesUnread;
                 do
                 {
-                    int n = stream.Read(bytes, numBytesRead, numBytesToRead);
+                    int n = this.stream.Read(bytes, numBytesRead, numBytesToRead);
 
                     if (n == 0)
                     {
@@ -289,8 +289,8 @@ namespace AbrFileTypePlugin
                 } while (numBytesToRead > 0);
 
                 // Invalidate the existing buffer.
-                readOffset = 0;
-                readLength = 0;
+                this.readOffset = 0;
+                this.readLength = 0;
             }
 
             return bytes;
@@ -328,18 +328,18 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public ushort ReadUInt16()
         {
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
 
-            if ((readOffset + sizeof(ushort)) > readLength)
+            if ((this.readOffset + sizeof(ushort)) > this.readLength)
             {
                 FillBuffer(sizeof(ushort));
             }
 
-            ushort val = (ushort)((buffer[readOffset] << 8) | buffer[readOffset + 1]);
-            readOffset += sizeof(ushort);
+            ushort val = (ushort)((this.buffer[this.readOffset] << 8) | this.buffer[this.readOffset + 1]);
+            this.readOffset += sizeof(ushort);
 
             return val;
         }
@@ -363,18 +363,18 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public uint ReadUInt32()
         {
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
 
-            if ((readOffset + sizeof(uint)) > readLength)
+            if ((this.readOffset + sizeof(uint)) > this.readLength)
             {
                 FillBuffer(sizeof(uint));
             }
 
-            uint val = (uint)((buffer[readOffset] << 24) | (buffer[readOffset + 1] << 16) | (buffer[readOffset + 2] << 8) | buffer[readOffset + 3]);
-            readOffset += sizeof(uint);
+            uint val = (uint)((this.buffer[this.readOffset] << 24) | (this.buffer[this.readOffset + 1] << 16) | (this.buffer[this.readOffset + 2] << 8) | this.buffer[this.readOffset + 3]);
+            this.readOffset += sizeof(uint);
 
             return val;
         }
@@ -411,19 +411,19 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public ulong ReadUInt64()
         {
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
 
-            if ((readOffset + sizeof(ulong)) > readLength)
+            if ((this.readOffset + sizeof(ulong)) > this.readLength)
             {
                 FillBuffer(sizeof(ulong));
             }
 
-            uint hi = (uint)((buffer[readOffset] << 24) | (buffer[readOffset + 1] << 16) | (buffer[readOffset + 2] << 8) | buffer[readOffset + 3]);
-            uint lo = (uint)((buffer[readOffset + 4] << 24) | (buffer[readOffset + 5] << 16) | (buffer[readOffset + 6] << 8) | buffer[readOffset + 7]);
-            readOffset += sizeof(ulong);
+            uint hi = (uint)((this.buffer[this.readOffset] << 24) | (this.buffer[this.readOffset + 1] << 16) | (this.buffer[this.readOffset + 2] << 8) | this.buffer[this.readOffset + 3]);
+            uint lo = (uint)((this.buffer[this.readOffset + 4] << 24) | (this.buffer[this.readOffset + 5] << 16) | (this.buffer[this.readOffset + 6] << 8) | this.buffer[this.readOffset + 7]);
+            this.readOffset += sizeof(ulong);
 
             return (((ulong)hi) << 32) | lo;
         }
@@ -438,7 +438,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public string ReadPascalString()
         {
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
@@ -458,7 +458,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public Rectangle ReadInt32Rectangle()
         {
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
@@ -481,7 +481,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public string ReadUnicodeString()
         {
-            if (stream == null)
+            if (this.stream == null)
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
@@ -501,18 +501,18 @@ namespace AbrFileTypePlugin
         /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         private void FillBuffer(int minBytes)
         {
-            int bytesUnread = readLength - readOffset;
+            int bytesUnread = this.readLength - this.readOffset;
 
             if (bytesUnread > 0)
             {
-                Buffer.BlockCopy(buffer, readOffset, buffer, 0, bytesUnread);
+                Buffer.BlockCopy(this.buffer, this.readOffset, this.buffer, 0, bytesUnread);
             }
 
-            int numBytesToRead = bufferSize - bytesUnread;
+            int numBytesToRead = this.bufferSize - bytesUnread;
             int numBytesRead = bytesUnread;
             do
             {
-                int n = stream.Read(buffer, numBytesRead, numBytesToRead);
+                int n = this.stream.Read(this.buffer, numBytesRead, numBytesToRead);
 
                 if (n == 0)
                 {
@@ -524,8 +524,8 @@ namespace AbrFileTypePlugin
 
             } while (numBytesRead < minBytes);
 
-            readOffset = 0;
-            readLength = numBytesRead;
+            this.readOffset = 0;
+            this.readLength = numBytesRead;
         }
 
         private static class EmptyArray<T>

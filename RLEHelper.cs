@@ -48,85 +48,85 @@ namespace AbrFileTypePlugin
             internal void Flush()
             {
                 byte header;
-                if (rlePacket)
+                if (this.rlePacket)
                 {
-                    header = (byte)(-(packetLength - 1));
-                    stream.WriteByte(header);
-                    stream.WriteByte(lastValue);
+                    header = (byte)(-(this.packetLength - 1));
+                    this.stream.WriteByte(header);
+                    this.stream.WriteByte(this.lastValue);
                 }
                 else
                 {
-                    header = (byte)(packetLength - 1);
-                    stream.WriteByte(header);
-                    stream.Write(data, idxPacketData, packetLength);
+                    header = (byte)(this.packetLength - 1);
+                    this.stream.WriteByte(header);
+                    this.stream.Write(this.data, this.idxPacketData, this.packetLength);
                 }
 
-                packetLength = 0;
+                this.packetLength = 0;
             }
 
             internal void PushRow(byte[] imgData, int startIdx, int endIdx)
             {
-                data = imgData;
+                this.data = imgData;
                 for (int i = startIdx; i < endIdx; i++)
                 {
                     byte color = imgData[i];
-                    if (packetLength == 0)
+                    if (this.packetLength == 0)
                     {
                         // Starting a fresh packet.
-                        rlePacket = false;
-                        lastValue = color;
-                        idxPacketData = i;
-                        packetLength = 1;
+                        this.rlePacket = false;
+                        this.lastValue = color;
+                        this.idxPacketData = i;
+                        this.packetLength = 1;
                     }
-                    else if (packetLength == 1)
+                    else if (this.packetLength == 1)
                     {
                         // 2nd byte of this packet... decide RLE or non-RLE.
-                        rlePacket = (color == lastValue);
-                        lastValue = color;
-                        packetLength = 2;
+                        this.rlePacket = (color == this.lastValue);
+                        this.lastValue = color;
+                        this.packetLength = 2;
                     }
-                    else if (packetLength == maxPacketLength)
+                    else if (this.packetLength == maxPacketLength)
                     {
                         // Packet is full. Start a new one.
                         Flush();
-                        rlePacket = false;
-                        lastValue = color;
-                        idxPacketData = i;
-                        packetLength = 1;
+                        this.rlePacket = false;
+                        this.lastValue = color;
+                        this.idxPacketData = i;
+                        this.packetLength = 1;
                     }
-                    else if (packetLength >= 2 && rlePacket && color != lastValue)
+                    else if (this.packetLength >= 2 && this.rlePacket && color != this.lastValue)
                     {
                         // We were filling in an RLE packet, and we got a non-repeated color.
                         // Emit the current packet and start a new one.
                         Flush();
-                        rlePacket = false;
-                        lastValue = color;
-                        idxPacketData = i;
-                        packetLength = 1;
+                        this.rlePacket = false;
+                        this.lastValue = color;
+                        this.idxPacketData = i;
+                        this.packetLength = 1;
                     }
-                    else if (packetLength >= 2 && rlePacket && color == lastValue)
+                    else if (this.packetLength >= 2 && this.rlePacket && color == this.lastValue)
                     {
                         // We are filling in an RLE packet, and we got another repeated color.
                         // Add the new color to the current packet.
-                        ++packetLength;
+                        ++this.packetLength;
                     }
-                    else if (packetLength >= 2 && !rlePacket && color != lastValue)
+                    else if (this.packetLength >= 2 && !this.rlePacket && color != this.lastValue)
                     {
                         // We are filling in a raw packet, and we got another random color.
                         // Add the new color to the current packet.
-                        lastValue = color;
-                        ++packetLength;
+                        this.lastValue = color;
+                        ++this.packetLength;
                     }
-                    else if (packetLength >= 2 && !rlePacket && color == lastValue)
+                    else if (this.packetLength >= 2 && !this.rlePacket && color == this.lastValue)
                     {
                         // We were filling in a raw packet, but we got a repeated color.
                         // Emit the current packet without its last color, and start a
                         // new RLE packet that starts with a length of 2.
-                        --packetLength;
+                        --this.packetLength;
                         Flush();
-                        rlePacket = true;
-                        packetLength = 2;
-                        lastValue = color;
+                        this.rlePacket = true;
+                        this.packetLength = 2;
+                        this.lastValue = color;
                     }
                 }
 
