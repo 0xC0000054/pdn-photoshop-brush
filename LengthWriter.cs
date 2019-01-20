@@ -34,7 +34,7 @@ namespace AbrFileTypePlugin
     {
         private readonly long lengthFieldOffset;
         private readonly long startPosition;
-        private BigEndianBinaryWriter writer;
+        private readonly BigEndianBinaryWriter writer;
         private bool disposed;
 
         public LengthWriter(BigEndianBinaryWriter writer)
