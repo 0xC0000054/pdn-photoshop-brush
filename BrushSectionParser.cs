@@ -22,7 +22,9 @@ namespace AbrFileTypePlugin
     {
         private readonly BrushSectionOffsets sectionOffsets;
 
+#pragma warning disable IDE0032 // Use Auto Property
         private SampledBrushCollection sampledBrushes;
+#pragma warning restore IDE0032 // Use Auto Property
 
         private const uint PhotoshopSignature = 0x3842494D; // 8BIM
         private const uint SampleSectionId = 0x73616D70; // samp
