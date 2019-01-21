@@ -13,49 +13,20 @@ namespace AbrFileTypePlugin
 {
     internal sealed class SampledBrush
     {
-        private readonly string name;
-        private readonly string tag;
-        private readonly int diameter;
-        private readonly int spacing;
+        public string Name { get; }
 
-        public string Name
-        {
-            get
-            {
-                return this.name;
-            }
-        }
+        public string Tag { get; }
 
-        public string Tag
-        {
-            get
-            {
-                return this.tag;
-            }
-        }
+        public int Diameter { get; }
 
-        public int Diameter
-        {
-            get
-            {
-                return this.diameter;
-            }
-        }
-
-        public int Spacing
-        {
-            get
-            {
-                return this.spacing;
-            }
-        }
+        public int Spacing { get; }
 
         public SampledBrush(string name, string tag, int diameter, int spacing)
         {
-            this.name = name;
-            this.tag = tag;
-            this.diameter = diameter;
-            this.spacing = spacing;
+            this.Name = name;
+            this.Tag = tag;
+            this.Diameter = diameter;
+            this.Spacing = spacing;
         }
     }
 }
