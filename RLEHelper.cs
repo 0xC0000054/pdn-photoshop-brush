@@ -108,21 +108,21 @@ namespace AbrFileTypePlugin
                     {
                         // We are filling in an RLE packet, and we got another repeated color.
                         // Add the new color to the current packet.
-                        ++this.packetLength;
+                        this.packetLength++;
                     }
                     else if (this.packetLength >= 2 && !this.rlePacket && color != this.lastValue)
                     {
                         // We are filling in a raw packet, and we got another random color.
                         // Add the new color to the current packet.
                         this.lastValue = color;
-                        ++this.packetLength;
+                        this.packetLength++;
                     }
                     else if (this.packetLength >= 2 && !this.rlePacket && color == this.lastValue)
                     {
                         // We were filling in a raw packet, but we got a repeated color.
                         // Emit the current packet without its last color, and start a
                         // new RLE packet that starts with a length of 2.
-                        --this.packetLength;
+                        this.packetLength--;
                         Flush();
                         this.rlePacket = true;
                         this.packetLength = 2;
