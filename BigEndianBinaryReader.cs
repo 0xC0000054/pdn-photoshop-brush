@@ -192,7 +192,7 @@ namespace AbrFileTypePlugin
 
                 if (bytesUnread > 0)
                 {
-                    Buffer.BlockCopy(this.buffer, this.readOffset, bytes, 0, bytesUnread);
+                    Buffer.BlockCopy(this.buffer, this.readOffset, bytes, offset, bytesUnread);
                 }
 
                 // Invalidate the existing buffer.
