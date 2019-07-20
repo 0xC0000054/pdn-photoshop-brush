@@ -72,10 +72,7 @@ namespace AbrFileTypePlugin
         {
             get
             {
-                if (this.stream == null)
-                {
-                    throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-                }
+                VerifyNotDisposed();
 
                 return this.stream.Length;
             }
@@ -93,10 +90,7 @@ namespace AbrFileTypePlugin
         {
             get
             {
-                if (this.stream == null)
-                {
-                    throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-                }
+                VerifyNotDisposed();
 
                 return this.stream.Position - this.readLength + this.readOffset;
             }
@@ -106,10 +100,8 @@ namespace AbrFileTypePlugin
                 {
                     throw new ArgumentOutOfRangeException("value");
                 }
-                if (this.stream == null)
-                {
-                    throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-                }
+
+                VerifyNotDisposed();
 
                 long current = this.Position;
 
@@ -168,10 +160,8 @@ namespace AbrFileTypePlugin
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+
+            VerifyNotDisposed();
 
             if (count == 0)
             {
@@ -215,10 +205,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public byte ReadByte()
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+            VerifyNotDisposed();
 
             if ((this.readOffset + sizeof(byte)) > this.readLength)
             {
@@ -245,10 +232,8 @@ namespace AbrFileTypePlugin
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+
+            VerifyNotDisposed();
 
             if (count == 0)
             {
@@ -328,10 +313,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public ushort ReadUInt16()
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+            VerifyNotDisposed();
 
             if ((this.readOffset + sizeof(ushort)) > this.readLength)
             {
@@ -363,10 +345,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public uint ReadUInt32()
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+            VerifyNotDisposed();
 
             if ((this.readOffset + sizeof(uint)) > this.readLength)
             {
@@ -411,10 +390,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public ulong ReadUInt64()
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+            VerifyNotDisposed();
 
             if ((this.readOffset + sizeof(ulong)) > this.readLength)
             {
@@ -438,10 +414,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public string ReadPascalString()
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+            VerifyNotDisposed();
 
             byte stringLength = ReadByte();
 
@@ -458,10 +431,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public Rectangle ReadInt32Rectangle()
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+            VerifyNotDisposed();
 
 #pragma warning disable IDE0017 // Simplify object initialization
             Rectangle rect = new Rectangle();
@@ -483,10 +453,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public string ReadUnicodeString()
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
-            }
+            VerifyNotDisposed();
 
             int lengthInChars = ReadInt32();
             byte[] bytes = ReadBytes(lengthInChars * 2);
@@ -528,6 +495,14 @@ namespace AbrFileTypePlugin
 
             this.readOffset = 0;
             this.readLength = numBytesRead;
+        }
+
+        private void VerifyNotDisposed()
+        {
+            if (this.stream == null)
+            {
+                throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
+            }
         }
 
         private static class EmptyArray<T>

@@ -66,10 +66,7 @@ namespace AbrFileTypePlugin
         {
             get
             {
-                if (this.stream == null)
-                {
-                    throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-                }
+                VerifyNotDisposed();
 
                 // Force the stream to write any buffered data.
                 this.stream.Flush();
@@ -97,10 +94,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void Write(byte value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             this.stream.WriteByte(value);
         }
@@ -112,10 +106,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void Write(short value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             this.buffer[0] = (byte)(value >> 8);
             this.buffer[1] = (byte)value;
@@ -130,10 +121,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void Write(int value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             this.buffer[0] = (byte)(value >> 24);
             this.buffer[1] = (byte)(value >> 16);
@@ -150,10 +138,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void Write(long value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             this.buffer[0] = (byte)(value >> 56);
             this.buffer[1] = (byte)(value >> 48);
@@ -174,10 +159,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void Write(ushort value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             this.buffer[0] = (byte)(value >> 8);
             this.buffer[1] = (byte)value;
@@ -192,10 +174,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void Write(uint value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             this.buffer[0] = (byte)(value >> 24);
             this.buffer[1] = (byte)(value >> 16);
@@ -212,10 +191,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void Write(ulong value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             this.buffer[0] = (byte)(value >> 56);
             this.buffer[1] = (byte)(value >> 48);
@@ -236,10 +212,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public unsafe void Write(float value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             int temp = *(int*)&value;
 
@@ -258,10 +231,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public unsafe void Write(double value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             long temp = *(long*)&value;
 
@@ -289,10 +259,8 @@ namespace AbrFileTypePlugin
             {
                 throw new ArgumentNullException(nameof(bytes));
             }
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+
+            VerifyNotDisposed();
 
             this.stream.Write(bytes, 0, bytes.Length);
         }
@@ -306,10 +274,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void Write(byte[] bytes, int offset, int count)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             this.stream.Write(bytes, offset, count);
         }
@@ -323,10 +288,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void WriteInt16Rectangle(Rectangle rect)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             Write((short)rect.Top);
             Write((short)rect.Left);
@@ -341,10 +303,7 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void WriteInt32Rectangle(Rectangle rect)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             Write(rect.Top);
             Write(rect.Left);
@@ -359,15 +318,20 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public void WriteUnicodeString(string value)
         {
-            if (this.stream == null)
-            {
-                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
-            }
+            VerifyNotDisposed();
 
             Write(checked(value.Length + 1));
             Write(Encoding.BigEndianUnicode.GetBytes(value));
             // The string is always null-terminated.
             Write((ushort)0);
+        }
+
+        private void VerifyNotDisposed()
+        {
+            if (this.stream == null)
+            {
+                throw new ObjectDisposedException(nameof(BigEndianBinaryWriter));
+            }
         }
     }
 }
