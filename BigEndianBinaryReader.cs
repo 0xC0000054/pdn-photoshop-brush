@@ -207,10 +207,7 @@ namespace AbrFileTypePlugin
         {
             VerifyNotDisposed();
 
-            if ((this.readOffset + sizeof(byte)) > this.readLength)
-            {
-                FillBuffer(sizeof(byte));
-            }
+            EnsureBuffer(sizeof(byte));
 
             byte val = this.buffer[this.readOffset];
             this.readOffset += sizeof(byte);
@@ -315,10 +312,7 @@ namespace AbrFileTypePlugin
         {
             VerifyNotDisposed();
 
-            if ((this.readOffset + sizeof(ushort)) > this.readLength)
-            {
-                FillBuffer(sizeof(ushort));
-            }
+            EnsureBuffer(sizeof(ushort));
 
             ushort val = (ushort)((this.buffer[this.readOffset] << 8) | this.buffer[this.readOffset + 1]);
             this.readOffset += sizeof(ushort);
@@ -347,10 +341,7 @@ namespace AbrFileTypePlugin
         {
             VerifyNotDisposed();
 
-            if ((this.readOffset + sizeof(uint)) > this.readLength)
-            {
-                FillBuffer(sizeof(uint));
-            }
+            EnsureBuffer(sizeof(uint));
 
             uint val = (uint)((this.buffer[this.readOffset] << 24) | (this.buffer[this.readOffset + 1] << 16) | (this.buffer[this.readOffset + 2] << 8) | this.buffer[this.readOffset + 3]);
             this.readOffset += sizeof(uint);
@@ -392,10 +383,7 @@ namespace AbrFileTypePlugin
         {
             VerifyNotDisposed();
 
-            if ((this.readOffset + sizeof(ulong)) > this.readLength)
-            {
-                FillBuffer(sizeof(ulong));
-            }
+            EnsureBuffer(sizeof(ulong));
 
             uint hi = (uint)((this.buffer[this.readOffset] << 24) | (this.buffer[this.readOffset + 1] << 16) | (this.buffer[this.readOffset + 2] << 8) | this.buffer[this.readOffset + 3]);
             uint lo = (uint)((this.buffer[this.readOffset + 4] << 24) | (this.buffer[this.readOffset + 5] << 16) | (this.buffer[this.readOffset + 6] << 8) | this.buffer[this.readOffset + 7]);
@@ -495,6 +483,19 @@ namespace AbrFileTypePlugin
 
             this.readOffset = 0;
             this.readLength = numBytesRead;
+        }
+
+        /// <summary>
+        /// Ensures that the buffer contains at least the number of bytes requested.
+        /// </summary>
+        /// <param name="count">The minimum number of bytes the buffer should contain.</param>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
+        private void EnsureBuffer(int count)
+        {
+            if ((this.readOffset + count) > this.readLength)
+            {
+                FillBuffer(count);
+            }
         }
 
         private void VerifyNotDisposed()
