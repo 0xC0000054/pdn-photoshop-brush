@@ -30,7 +30,7 @@ using System.IO;
 
 namespace AbrFileTypePlugin
 {
-    static class RLEHelper
+    internal static class RLEHelper
     {
         ////////////////////////////////////////////////////////////////////////
 
