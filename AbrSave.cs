@@ -208,19 +208,23 @@ namespace AbrFileTypePlugin
         {
             byte[] alpha = new byte[imageBounds.Width * imageBounds.Height];
 
-            fixed (byte* ptr = alpha)
+            // The 'fixed' statement will throw an exception if the array length is zero.
+            if (alpha.Length > 0)
             {
-                for (int y = 0; y < imageBounds.Height; y++)
+                fixed (byte* ptr = alpha)
                 {
-                    ColorBgra* src = surface.GetPointAddressUnchecked(imageBounds.Left, imageBounds.Top + y);
-                    byte* dst = ptr + (y * imageBounds.Width);
-
-                    for (int x = 0; x < imageBounds.Width; x++)
+                    for (int y = 0; y < imageBounds.Height; y++)
                     {
-                        *dst = src->A;
+                        ColorBgra* src = surface.GetPointAddressUnchecked(imageBounds.Left, imageBounds.Top + y);
+                        byte* dst = ptr + (y * imageBounds.Width);
 
-                        src++;
-                        dst++;
+                        for (int x = 0; x < imageBounds.Width; x++)
+                        {
+                            *dst = src->A;
+
+                            src++;
+                            dst++;
+                        }
                     }
                 }
             }
