@@ -22,7 +22,7 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="tag">The tag.</param>
         /// <returns>The largest diameter brush matching the specified tag.</returns>
-        public SampledBrush FindBrush(string tag)
+        public SampledBrush FindLargestBrush(string tag)
         {
             IList<SampledBrush> items = this.Items;
             SampledBrush brush = null;

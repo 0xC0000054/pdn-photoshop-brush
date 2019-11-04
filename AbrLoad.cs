@@ -324,7 +324,7 @@ namespace AbrFileTypePlugin
                         continue;
                     }
 
-                    SampledBrush sampledBrush = parser.SampledBrushes.FindBrush(tag);
+                    SampledBrush sampledBrush = parser.SampledBrushes.FindLargestBrush(tag);
                     if (sampledBrush != null)
                     {
                         AbrImageCompression compression = (AbrImageCompression)reader.ReadByte();
