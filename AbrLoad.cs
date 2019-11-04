@@ -201,7 +201,9 @@ namespace AbrFileTypePlugin
                     int rowsRemaining = height;
                     int rowsRead = 0;
 
-                    byte[] alphaData = new byte[width * height];
+                    int alphaDataSize = checked(width * height);
+
+                    byte[] alphaData = new byte[alphaDataSize];
                     do
                     {
                         // Sampled brush data is broken into repeating chunks for brushes taller that 16384 pixels.
@@ -341,13 +343,16 @@ namespace AbrFileTypePlugin
                                 compressedRowLengths[y] = reader.ReadInt16();
                             }
 
-                            int alphaDataSize = width * height;
+                            int alphaDataSize = checked(width * height);
                             int bytesPerRow = width;
 
                             if (depth == 16)
                             {
-                                alphaDataSize *= 2;
-                                bytesPerRow *= 2;
+                                checked
+                                {
+                                    alphaDataSize *= 2;
+                                    bytesPerRow *= 2;
+                                }
                             }
 
                             alphaData = new byte[alphaDataSize];
@@ -359,11 +364,14 @@ namespace AbrFileTypePlugin
                         }
                         else
                         {
-                            int alphaDataSize = width * height;
+                            int alphaDataSize = checked(width * height);
 
                             if (depth == 16)
                             {
-                                alphaDataSize *= 2;
+                                checked
+                                {
+                                    alphaDataSize *= 2;
+                                }
                             }
 
                             alphaData = reader.ReadBytes(alphaDataSize);
