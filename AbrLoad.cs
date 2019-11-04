@@ -62,7 +62,7 @@ namespace AbrFileTypePlugin
 
 				int maxWidth = 0;
 				int maxHeight = 0;
-				foreach (var item in brushes)
+				foreach (Brush item in brushes)
 				{
 					if (item.Surface.Width > maxWidth)
 					{
@@ -369,18 +369,18 @@ namespace AbrFileTypePlugin
 							alphaData = reader.ReadBytes(alphaDataSize);
 						}
 
-						var brush = CreateSampledBrush(width, height, depth, alphaData, sampledBrush.Name, sampledBrush.Spacing);
+                        Brush brush = CreateSampledBrush(width, height, depth, alphaData, sampledBrush.Name, sampledBrush.Spacing);
 
 						brushes.Add(brush);
 
-						// Some brushes only store the largest item and scale it down.
-						var scaledBrushes = parser.SampledBrushes.Where(i => i.Tag.Equals(tag, StringComparison.Ordinal) && i.Diameter < sampledBrush.Diameter);
+                        // Some brushes only store the largest item and scale it down.
+                        IEnumerable<SampledBrush> scaledBrushes = parser.SampledBrushes.Where(i => i.Tag.Equals(tag, StringComparison.Ordinal) && i.Diameter < sampledBrush.Diameter);
 						if (scaledBrushes.Any())
 						{
 							int originalWidth = brush.Surface.Width;
 							int originalHeight = brush.Surface.Height;
 
-							foreach (var item in scaledBrushes.OrderByDescending(p => p.Diameter))
+							foreach (SampledBrush item in scaledBrushes.OrderByDescending(p => p.Diameter))
 							{
 								Size size = ComputeBrushSize(originalWidth, originalHeight, item.Diameter);
 
