@@ -107,14 +107,13 @@ namespace AbrFileTypePlugin
 
                 if (value != current)
                 {
-                    long diff = value - current;
-
-                    long newOffset = this.readOffset + diff;
+                    long bufferStartOffset = current - this.readOffset;
+                    long bufferEndOffset = bufferStartOffset + this.readLength;
 
                     // Avoid reading from the stream if the offset is within the current buffer.
-                    if (newOffset >= 0 && newOffset <= this.readLength)
+                    if (value >= bufferStartOffset && value <= bufferEndOffset)
                     {
-                        this.readOffset = (int)newOffset;
+                        this.readOffset = (int)(value - bufferStartOffset);
                     }
                     else
                     {
