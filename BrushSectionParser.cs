@@ -97,12 +97,7 @@ namespace AbrFileTypePlugin
         {
             get
             {
-                if (this.sectionOffsets != null)
-                {
-                    return this.sectionOffsets.sampleSectionOffset;
-                }
-
-                return -1;
+                return this.sectionOffsets?.sampleSectionOffset ?? -1;
             }
         }
 
