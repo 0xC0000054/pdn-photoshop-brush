@@ -20,13 +20,7 @@ namespace AbrFileTypePlugin
     [PluginSupportInfo(typeof(PluginSupportInfo))]
     public sealed class AbrFileType : PropertyBasedFileType
     {
-        public static string StaticName
-        {
-            get
-            {
-                return "Photoshop Brush";
-            }
-        }
+        public static string StaticName => "Photoshop Brush";
 
         public AbrFileType() : base(
             StaticName,

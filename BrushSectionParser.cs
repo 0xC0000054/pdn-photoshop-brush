@@ -79,13 +79,7 @@ namespace AbrFileTypePlugin
         /// <value>
         /// The sampled brush information.
         /// </value>
-        public SampledBrushCollection SampledBrushes
-        {
-            get
-            {
-                return this.sampledBrushes;
-            }
-        }
+        public SampledBrushCollection SampledBrushes => this.sampledBrushes;
 
         /// <summary>
         /// Gets the sample section offset.
@@ -93,13 +87,7 @@ namespace AbrFileTypePlugin
         /// <value>
         /// The sample section offset.
         /// </value>
-        public long SampleSectionOffset
-        {
-            get
-            {
-                return this.sectionOffsets?.sampleSectionOffset ?? -1;
-            }
-        }
+        public long SampleSectionOffset => this.sectionOffsets?.sampleSectionOffset ?? -1;
 
         private static BrushSectionOffsets GetBrushSectionOffsets(BigEndianBinaryReader reader)
         {

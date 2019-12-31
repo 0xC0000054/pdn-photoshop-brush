@@ -17,44 +17,14 @@ namespace AbrFileTypePlugin
 {
     public sealed class PluginSupportInfo : IPluginSupportInfo
     {
-        public string Author
-        {
-            get
-            {
-                return "null54";
-            }
-        }
+        public string Author => "null54";
 
-        public string Copyright
-        {
-            get
-            {
-                return ((AssemblyCopyrightAttribute)typeof(AbrFileType).Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright;
-            }
-        }
+        public string Copyright => ((AssemblyCopyrightAttribute)typeof(AbrFileType).Assembly.GetCustomAttributes(typeof(AssemblyCopyrightAttribute), false)[0]).Copyright;
 
-        public string DisplayName
-        {
-            get
-            {
-                return AbrFileType.StaticName;
-            }
-        }
+        public string DisplayName => AbrFileType.StaticName;
 
-        public Version Version
-        {
-            get
-            {
-                return typeof(AbrFileType).Assembly.GetName().Version;
-            }
-        }
+        public Version Version => typeof(AbrFileType).Assembly.GetName().Version;
 
-        public Uri WebsiteUri
-        {
-            get
-            {
-                return new Uri("https://forums.getpaint.net/index.php?/topic/25792-photoshop-brush-filetype/");
-            }
-        }
+        public Uri WebsiteUri => new Uri("https://forums.getpaint.net/index.php?/topic/25792-photoshop-brush-filetype/");
     }
 }

@@ -522,29 +522,11 @@ namespace AbrFileTypePlugin
                 this.spacing = spacing;
             }
 
-            public Surface Surface
-            {
-                get
-                {
-                    return this.surface;
-                }
-            }
+            public Surface Surface => this.surface;
 
-            public string Name
-            {
-                get
-                {
-                    return this.name;
-                }
-            }
+            public string Name => this.name;
 
-            public int Spacing
-            {
-                get
-                {
-                    return this.spacing;
-                }
-            }
+            public int Spacing => this.spacing;
 
             public void Dispose()
             {
