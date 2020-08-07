@@ -40,7 +40,7 @@ namespace AbrFileTypePlugin
             private byte lastValue;
             private int idxPacketData;
             private int packetLength;
-            private Stream stream;
+            private readonly Stream stream;
             private byte[] data;
 
             private const int maxPacketLength = 128;
