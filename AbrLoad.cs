@@ -116,11 +116,7 @@ namespace AbrFileTypePlugin
                 }
                 finally
                 {
-                    if (tempDoc != null)
-                    {
-                        tempDoc.Dispose();
-                        tempDoc = null;
-                    }
+                    tempDoc?.Dispose();
                 }
 
                 return doc;
