@@ -39,7 +39,7 @@ namespace AbrFileTypePlugin
     internal sealed class BigEndianBinaryReader : IDisposable
     {
         private Stream stream;
-        private byte[] buffer;
+        private readonly byte[] buffer;
         private int readOffset;
         private int readLength;
 
