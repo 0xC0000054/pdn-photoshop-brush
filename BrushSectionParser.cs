@@ -157,9 +157,7 @@ namespace AbrFileTypePlugin
                 length = 4;
             }
 
-            byte[] bytes = reader.ReadBytes(length);
-
-            return Encoding.ASCII.GetString(bytes);
+            return reader.ReadAsciiString(length);
         }
 
         private static string ParseClassId(BigEndianBinaryReader reader)
@@ -170,7 +168,7 @@ namespace AbrFileTypePlugin
                 length = 4;
             }
 
-            return Encoding.ASCII.GetString(reader.ReadBytes(length)).TrimEnd('\0');
+            return reader.ReadAsciiString(length).TrimEnd('\0');
         }
 
         private void ParseList(BigEndianBinaryReader reader)

@@ -391,6 +391,37 @@ namespace AbrFileTypePlugin
             return (((ulong)hi) << 32) | lo;
         }
 
+        /// <summary>
+        /// Reads the ASCII string.
+        /// </summary>
+        /// <param name="length">The length of the ASCII string.</param>
+        /// <returns>A string containing the characters of the ASCII string.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="length"/> is less than zero.</exception>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
+        /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        public string ReadAsciiString(int length)
+        {
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length));
+            }
+
+            VerifyNotDisposed();
+
+            if (length == 0)
+            {
+                return string.Empty;
+            }
+
+            EnsureBuffer(length);
+
+            string result = Encoding.ASCII.GetString(this.buffer, this.readOffset, length);
+
+            this.readOffset += length;
+
+            return result;
+        }
+
         //////////////////////////////////////////////////////////////////
 
         /// <summary>
@@ -410,9 +441,13 @@ namespace AbrFileTypePlugin
                 return string.Empty;
             }
 
-            byte[] bytes = ReadBytes(stringLength);
+            EnsureBuffer(stringLength);
 
-            return Encoding.ASCII.GetString(bytes);
+            string result = Encoding.ASCII.GetString(this.buffer, this.readOffset, stringLength);
+
+            this.readOffset += stringLength;
+
+            return result;
         }
 
         /// <summary>
@@ -454,9 +489,15 @@ namespace AbrFileTypePlugin
                 return string.Empty;
             }
 
-            byte[] bytes = ReadBytes(lengthInChars * 2);
+            int lengthInBytes = checked(lengthInChars * 2);
 
-            return Encoding.BigEndianUnicode.GetString(bytes).TrimEnd('\0');
+            EnsureBuffer(lengthInBytes);
+
+            string result = Encoding.BigEndianUnicode.GetString(this.buffer, this.readOffset, lengthInBytes).TrimEnd('\0');
+
+            this.readOffset += lengthInBytes;
+
+            return result;
         }
 
         //////////////////////////////////////////////////////////////////
