@@ -162,13 +162,7 @@ namespace AbrFileTypePlugin
 
         private static string ParseClassId(BigEndianBinaryReader reader)
         {
-            int length = reader.ReadInt32();
-            if (length == 0)
-            {
-                length = 4;
-            }
-
-            return reader.ReadAsciiString(length).TrimEnd('\0');
+            return ParseKey(reader);
         }
 
         private void ParseList(BigEndianBinaryReader reader)

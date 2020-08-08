@@ -415,7 +415,23 @@ namespace AbrFileTypePlugin
 
             EnsureBuffer(length);
 
-            string result = Encoding.ASCII.GetString(this.buffer, this.readOffset, length);
+            int stringLength = length;
+
+            while (stringLength > 0 && this.buffer[this.readOffset + stringLength - 1] == 0)
+            {
+                stringLength--;
+            }
+
+            string result;
+
+            if (stringLength == 0)
+            {
+                result = string.Empty;
+            }
+            else
+            {
+                result = Encoding.ASCII.GetString(this.buffer, this.readOffset, stringLength);
+            }
 
             this.readOffset += length;
 
