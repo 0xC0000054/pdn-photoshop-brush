@@ -405,6 +405,11 @@ namespace AbrFileTypePlugin
 
             byte stringLength = ReadByte();
 
+            if (stringLength == 0)
+            {
+                return string.Empty;
+            }
+
             byte[] bytes = ReadBytes(stringLength);
 
             return Encoding.ASCII.GetString(bytes);
@@ -443,6 +448,12 @@ namespace AbrFileTypePlugin
             VerifyNotDisposed();
 
             int lengthInChars = ReadInt32();
+
+            if (lengthInChars == 0)
+            {
+                return string.Empty;
+            }
+
             byte[] bytes = ReadBytes(lengthInChars * 2);
 
             return Encoding.BigEndianUnicode.GetString(bytes).TrimEnd('\0');
