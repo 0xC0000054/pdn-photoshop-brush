@@ -493,16 +493,25 @@ namespace AbrFileTypePlugin
 
             EnsureBuffer(lengthInBytes);
 
+            int stringLengthInBytes = lengthInBytes;
+
+            // Skip any UTF-16 NUL characters at the end of the string.
+            while (stringLengthInBytes > 0
+                   && this.buffer[this.readOffset + stringLengthInBytes - 1] == 0
+                   && this.buffer[this.readOffset + stringLengthInBytes - 2] == 0)
+            {
+                stringLengthInBytes -= 2;
+            }
+
             string result;
 
-            // Some "empty" strings may consist of a single UTF-16 NUL character.
-            if (lengthInChars == 1 && this.buffer[this.readOffset] == 0 && this.buffer[this.readOffset + 1] == 0)
+            if (stringLengthInBytes == 0)
             {
                 result = string.Empty;
             }
             else
             {
-                result = Encoding.BigEndianUnicode.GetString(this.buffer, this.readOffset, lengthInBytes).TrimEnd('\0');
+                result = Encoding.BigEndianUnicode.GetString(this.buffer, this.readOffset, stringLengthInBytes);
             }
 
             this.readOffset += lengthInBytes;
