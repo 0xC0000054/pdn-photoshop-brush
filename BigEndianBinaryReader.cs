@@ -493,7 +493,17 @@ namespace AbrFileTypePlugin
 
             EnsureBuffer(lengthInBytes);
 
-            string result = Encoding.BigEndianUnicode.GetString(this.buffer, this.readOffset, lengthInBytes).TrimEnd('\0');
+            string result;
+
+            // Some "empty" strings may consist of a single UTF-16 NUL character.
+            if (lengthInChars == 1 && this.buffer[this.readOffset] == 0 && this.buffer[this.readOffset + 1] == 0)
+            {
+                result = string.Empty;
+            }
+            else
+            {
+                result = Encoding.BigEndianUnicode.GetString(this.buffer, this.readOffset, lengthInBytes).TrimEnd('\0');
+            }
 
             this.readOffset += lengthInBytes;
 
