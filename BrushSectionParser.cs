@@ -411,14 +411,26 @@ namespace AbrFileTypePlugin
                     ParseEnumerated(reader);
                     break;
                 default:
-                    throw new FormatException(string.Format(CultureInfo.CurrentCulture, "Unsupported brush descriptor type: '{0}'", DescriptorTypeToString(type)));
+                    throw new FormatException(string.Format(CultureInfo.CurrentCulture, "Unsupported brush descriptor type: {0}", DescriptorTypeToString(type)));
             }
         }
 
         private static string DescriptorTypeToString(DescriptorTypes type)
         {
-            byte[] bytes = BitConverter.GetBytes((uint)type);
-            return Encoding.ASCII.GetString(bytes);
+            uint value = (uint)type;
+
+            StringBuilder builder = new StringBuilder(32);
+
+            builder.Append('\'');
+            for (int i = 3; i >= 0; i--)
+            {
+                builder.Append((char)((value >> (i * 8)) & 0xff));
+            }
+            builder.Append('\'');
+
+            builder.Append(" (0x").Append(value.ToString("X8", CultureInfo.InvariantCulture)).Append(')');
+
+            return builder.ToString();
         }
 
         private struct UnitFloat
