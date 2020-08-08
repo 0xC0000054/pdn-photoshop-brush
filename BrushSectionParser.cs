@@ -26,10 +26,6 @@ namespace AbrFileTypePlugin
         private readonly SampledBrushCollection sampledBrushes;
 #pragma warning restore IDE0032 // Use Auto Property
 
-        private const uint PhotoshopSignature = 0x3842494D; // 8BIM
-        private const uint SampleSectionId = 0x73616D70; // samp
-        private const uint DescriptorSectionId = 0x64657363; // desc
-
         /// <summary>
         /// Initializes a new instance of the <see cref="BrushSectionParser"/> class.
         /// </summary>
@@ -91,6 +87,10 @@ namespace AbrFileTypePlugin
 
         private static BrushSectionOffsets GetBrushSectionOffsets(BigEndianBinaryReader reader)
         {
+            const uint PhotoshopSignature = 0x3842494D; // 8BIM
+            const uint SampleSectionId = 0x73616D70; // samp
+            const uint DescriptorSectionId = 0x64657363; // desc
+
             long sampleSectionOffset = -1;
             long descriptorSectionOffset = -1;
 
