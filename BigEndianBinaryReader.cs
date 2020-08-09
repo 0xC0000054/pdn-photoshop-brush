@@ -417,6 +417,7 @@ namespace AbrFileTypePlugin
 
             int stringLength = length;
 
+            // Skip any NUL characters at the end of the string.
             while (stringLength > 0 && this.buffer[this.readOffset + stringLength - 1] == 0)
             {
                 stringLength--;
