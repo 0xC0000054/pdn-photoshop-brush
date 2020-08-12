@@ -11,9 +11,9 @@
 
 namespace AbrFileTypePlugin
 {
-	internal enum AbrBrushType : short
-	{
-		Computed = 1,
-		Sampled
-	}
+    internal enum AbrBrushType : short
+    {
+        Computed = 1,
+        Sampled
+    }
 }
