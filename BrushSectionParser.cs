@@ -100,7 +100,7 @@ namespace AbrFileTypePlugin
 
                 if (sig != PhotoshopSignature)
                 {
-                    return null;
+                    break;
                 }
 
                 uint sectionId = reader.ReadUInt32();
