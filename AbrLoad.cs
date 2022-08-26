@@ -142,7 +142,8 @@ namespace AbrFileTypePlugin
                 if (type == AbrBrushType.Computed)
                 {
 #if DEBUG
-                    int misc = reader.ReadInt32();
+                    // Skip the obsolete 'miscellaneous' field
+                    reader.Position += 4L;
                     short spacing = reader.ReadInt16();
 
                     string name = string.Empty;
@@ -161,7 +162,8 @@ namespace AbrFileTypePlugin
                 }
                 else if (type == AbrBrushType.Sampled)
                 {
-                    int misc = reader.ReadInt32();
+                    // Skip the obsolete 'miscellaneous' field
+                    reader.Position += 4L;
                     short spacing = reader.ReadInt16();
 
                     string name = string.Empty;
