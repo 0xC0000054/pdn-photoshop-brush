@@ -37,7 +37,7 @@ namespace AbrFileTypePlugin
         {
             using (BigEndianBinaryReader reader = new BigEndianBinaryReader(stream))
             {
-                ReadOnlyCollection<Brush> brushes;
+                List<Brush> brushes;
                 short version = reader.ReadInt16();
 
                 switch (version)
@@ -123,7 +123,7 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private static ReadOnlyCollection<Brush> DecodeVersion1(BigEndianBinaryReader reader, short version)
+        private static List<Brush> DecodeVersion1(BigEndianBinaryReader reader, short version)
         {
             short count = reader.ReadInt16();
 
@@ -256,10 +256,10 @@ namespace AbrFileTypePlugin
                 }
             }
 
-            return brushes.AsReadOnly();
+            return brushes;
         }
 
-        private static ReadOnlyCollection<Brush> DecodeVersion6(BigEndianBinaryReader reader, short majorVersion)
+        private static List<Brush> DecodeVersion6(BigEndianBinaryReader reader, short majorVersion)
         {
             short minorVersion = reader.ReadInt16();
             long unusedDataLength;
@@ -407,7 +407,7 @@ namespace AbrFileTypePlugin
                 }
             }
 
-            return brushes.AsReadOnly();
+            return brushes;
         }
 
         private static unsafe Brush CreateSampledBrush(int width, int height, int depth, byte[] alphaData, string name, int spacing)
