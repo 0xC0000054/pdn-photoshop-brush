@@ -151,10 +151,8 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public int Read(byte[] bytes, int offset, int count)
         {
-            if (bytes == null)
-            {
-                throw new ArgumentNullException(nameof(bytes));
-            }
+            ArgumentNullException.ThrowIfNull(bytes);
+
             if (count < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
@@ -162,37 +160,75 @@ namespace AbrFileTypePlugin
 
             VerifyNotDisposed();
 
+            return ReadInternal(new Span<byte>(bytes, offset, count));
+        }
+
+        /// <summary>
+        /// Reads the specified number of bytes from the stream.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        /// <returns>The number of bytes read from the stream.</returns>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
+        /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        public int Read(Span<byte> destination)
+        {
+            VerifyNotDisposed();
+
+            return ReadInternal(destination);
+        }
+
+
+        /// <summary>
+        /// Reads the specified number of bytes from the stream, starting from a specified point in the byte array.
+        /// </summary>
+        /// <param name="bytes">The bytes.</param>
+        /// <param name="offset">The starting offset in the array.</param>
+        /// <param name="count">The count.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="bytes"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="count"/> is negative.</exception>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
+        /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        public void ProperRead(byte[] bytes, int offset, int count)
+        {
+            ArgumentNullException.ThrowIfNull(bytes);
+
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
+            ProperRead(new Span<byte>(bytes, offset, count));
+        }
+
+        /// <summary>
+        /// Reads the specified number of bytes from the stream.
+        /// </summary>
+        /// <param name="span">The span.</param>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
+        /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        public void ProperRead(Span<byte> span)
+        {
+            VerifyNotDisposed();
+
+            int count = span.Length;
+
             if (count == 0)
             {
-                return 0;
+                return;
             }
 
-            if ((this.readOffset + count) <= this.readLength)
-            {
-                Buffer.BlockCopy(this.buffer, this.readOffset, bytes, offset, count);
-                this.readOffset += count;
+            int totalBytesRead = 0;
 
-                return count;
-            }
-            else
+            while (totalBytesRead < count)
             {
-                // Ensure that any bytes at the end of the current buffer are included.
-                int bytesUnread = this.readLength - this.readOffset;
+                int bytesRead = ReadInternal(span.Slice(totalBytesRead, count - totalBytesRead));
 
-                if (bytesUnread > 0)
+                if (bytesRead == 0)
                 {
-                    Buffer.BlockCopy(this.buffer, this.readOffset, bytes, offset, bytesUnread);
+                    throw new EndOfStreamException();
                 }
 
-                // Invalidate the existing buffer.
-                this.readOffset = 0;
-                this.readLength = 0;
-
-                int totalBytesRead = bytesUnread;
-
-                totalBytesRead += this.stream.Read(bytes, offset + bytesUnread, count - bytesUnread);
-
-                return totalBytesRead;
+                totalBytesRead += bytesRead;
             }
         }
 
@@ -539,40 +575,6 @@ namespace AbrFileTypePlugin
         //////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Fills the buffer with at least the number of bytes requested.
-        /// </summary>
-        /// <param name="minBytes">The minimum number of bytes to place in the buffer.</param>
-        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
-        private void FillBuffer(int minBytes)
-        {
-            int bytesUnread = this.readLength - this.readOffset;
-
-            if (bytesUnread > 0)
-            {
-                Buffer.BlockCopy(this.buffer, this.readOffset, this.buffer, 0, bytesUnread);
-            }
-
-            int numBytesToRead = this.bufferSize - bytesUnread;
-            int numBytesRead = bytesUnread;
-            do
-            {
-                int n = this.stream.Read(this.buffer, numBytesRead, numBytesToRead);
-
-                if (n == 0)
-                {
-                    throw new EndOfStreamException();
-                }
-
-                numBytesRead += n;
-                numBytesToRead -= n;
-
-            } while (numBytesRead < minBytes);
-
-            this.readOffset = 0;
-            this.readLength = numBytesRead;
-        }
-
-        /// <summary>
         /// Ensures that the buffer contains at least the number of bytes requested.
         /// </summary>
         /// <param name="count">The minimum number of bytes the buffer should contain.</param>
@@ -583,6 +585,124 @@ namespace AbrFileTypePlugin
             {
                 FillBuffer(count);
             }
+        }
+
+        /// <summary>
+        /// Fills the buffer with at least the number of bytes requested.
+        /// </summary>
+        /// <param name="minBytes">The minimum number of bytes to place in the buffer.</param>
+        /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
+        private void FillBuffer(int minBytes)
+        {
+            if (!TryFillBuffer(minBytes))
+            {
+                ThrowEndOfStreamException();
+            }
+
+            static void ThrowEndOfStreamException()
+            {
+                throw new EndOfStreamException();
+            }
+        }
+
+        /// <summary>
+        /// Reads the specified number of bytes from the stream.
+        /// </summary>
+        /// <param name="destination">The span.</param>
+        /// <returns>The number of bytes read from the stream.</returns>
+        private int ReadInternal(Span<byte> destination)
+        {
+            int count = destination.Length;
+
+            if (count == 0)
+            {
+                return 0;
+            }
+
+            if ((this.readOffset + count) <= this.readLength)
+            {
+                new ReadOnlySpan<byte>(this.buffer, this.readOffset, count).CopyTo(destination);
+                this.readOffset += count;
+
+                return count;
+            }
+            else
+            {
+                int totalBytesRead;
+
+                if (count < this.bufferSize)
+                {
+                    // This is an optimization for sequentially reading small ranges of bytes
+                    // from a file.
+                    // For example, a file signature that will be followed by other header data.
+                    //
+                    // TryFillBuffer may return fewer bytes than were requested if the end of the
+                    // stream has been reached.
+                    totalBytesRead = TryFillBuffer(count) ? count : this.readLength;
+
+                    if (totalBytesRead > 0)
+                    {
+                        new ReadOnlySpan<byte>(this.buffer, this.readOffset, totalBytesRead).CopyTo(destination.Slice(0, totalBytesRead));
+
+                        this.readOffset += totalBytesRead;
+                    }
+                }
+                else
+                {
+                    // Ensure that any bytes at the end of the current buffer are included.
+                    int bytesUnread = this.readLength - this.readOffset;
+
+                    if (bytesUnread > 0)
+                    {
+                        new ReadOnlySpan<byte>(this.buffer, this.readOffset, bytesUnread).CopyTo(destination);
+                    }
+
+                    totalBytesRead = bytesUnread;
+                    int bytesRemaining = count - bytesUnread;
+
+                    // Invalidate the existing buffer.
+                    this.readOffset = 0;
+                    this.readLength = 0;
+
+                    totalBytesRead += this.stream.Read(destination.Slice(bytesUnread, bytesRemaining));
+                }
+
+                return totalBytesRead;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to fill the buffer with at least the number of bytes requested.
+        /// </summary>
+        /// <param name="minBytes">The minimum number of bytes to place in the buffer.</param>
+        /// <returns>
+        /// <see langword="true"/> if the buffer contains at least <paramref name="minBytes"/>; otherwise, <see langword="false"/>.
+        /// </returns>
+        private bool TryFillBuffer(int minBytes)
+        {
+            int bytesUnread = this.readLength - this.readOffset;
+
+            if (bytesUnread > 0)
+            {
+                Buffer.BlockCopy(this.buffer, this.readOffset, this.buffer, 0, bytesUnread);
+            }
+
+            this.readOffset = 0;
+            this.readLength = bytesUnread;
+            do
+            {
+                int bytesRead = this.stream.Read(this.buffer, this.readLength, this.bufferSize - this.readLength);
+
+                if (bytesRead == 0)
+                {
+                    return false;
+                }
+
+                this.readLength += bytesRead;
+
+            } while (this.readLength < minBytes);
+
+            return true;
         }
 
         private void VerifyNotDisposed()

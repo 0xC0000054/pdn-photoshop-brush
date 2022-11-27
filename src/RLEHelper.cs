@@ -26,6 +26,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using System;
 using System.IO;
 
 namespace AbrFileTypePlugin
@@ -164,14 +165,10 @@ namespace AbrFileTypePlugin
                 if (len < 128)
                 {
                     len++;
-                    while (len != 0 && (startIdx + count) < imgData.Length)
-                    {
-                        byteValue = reader.ReadByte();
 
-                        imgData[startIdx + count] = byteValue;
-                        count++;
-                        len--;
-                    }
+                    reader.ProperRead(new Span<byte>(imgData, startIdx + count, len));
+
+                    count += len;
                 }
                 else if (len > 128)
                 {
@@ -182,12 +179,9 @@ namespace AbrFileTypePlugin
 
                     byteValue = reader.ReadByte();
 
-                    while (len != 0 && (startIdx + count) < imgData.Length)
-                    {
-                        imgData[startIdx + count] = byteValue;
-                        count++;
-                        len--;
-                    }
+                    new Span<byte>(imgData, startIdx + count, len).Fill(byteValue);
+
+                    count += len;
                 }
             }
         }
