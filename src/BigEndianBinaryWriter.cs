@@ -269,14 +269,12 @@ namespace AbrFileTypePlugin
         /// Writes the specified number of bytes to the current stream, starting from a specified point in the byte array.
         /// </summary>
         /// <param name="bytes">The bytes.</param>
-        /// <param name="offset">The starting offset in the array.</param>
-        /// <param name="count">The count.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
-        public void Write(byte[] bytes, int offset, int count)
+        public void Write(ReadOnlySpan<byte> bytes)
         {
             VerifyNotDisposed();
 
-            this.stream.Write(bytes, offset, count);
+            this.stream.Write(bytes);
         }
 
         //////////////////////////////////////////////////////////////////

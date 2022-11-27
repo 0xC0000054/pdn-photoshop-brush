@@ -20,6 +20,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using AbrFileTypePlugin.Properties;
+using CommunityToolkit.HighPerformance.Buffers;
 using PaintDotNet;
 using System;
 using System.Collections.Generic;
@@ -201,53 +202,47 @@ namespace AbrFileTypePlugin
 
                     int alphaDataSize = checked(width * height);
 
-                    byte[] alphaData = new byte[alphaDataSize];
-                    do
+                    using (SpanOwner<byte> alphaDataOwner = SpanOwner<byte>.Allocate(alphaDataSize))
                     {
-                        // Sampled brush data is broken into repeating chunks for brushes taller that 16384 pixels.
-                        int chunkHeight = Math.Min(rowsRemaining, 16384);
-                        // The format specs state that compression is stored as a 2-byte field, but it is written as a 1-byte field in actual files.
-                        AbrImageCompression compression = (AbrImageCompression)reader.ReadByte();
+                        Span<byte> alphaData = alphaDataOwner.Span;
 
-                        if (compression == AbrImageCompression.RLE)
+                        do
                         {
-                            short[] compressedRowLengths = new short[height];
+                            // Sampled brush data is broken into repeating chunks for brushes taller that 16384 pixels.
+                            int chunkHeight = Math.Min(rowsRemaining, 16384);
+                            // The format specs state that compression is stored as a 2-byte field, but it is written as a 1-byte field in actual files.
+                            AbrImageCompression compression = (AbrImageCompression)reader.ReadByte();
 
-                            for (int y = 0; y < height; y++)
+                            if (compression == AbrImageCompression.RLE)
                             {
-                                compressedRowLengths[y] = reader.ReadInt16();
-                            }
+                                short[] compressedRowLengths = new short[height];
 
-                            for (int y = 0; y < chunkHeight; y++)
-                            {
-                                int row = rowsRead + y;
-                                RLEHelper.DecodedRow(reader, alphaData, row * width, width);
-                            }
-                        }
-                        else
-                        {
-                            int numBytesToRead = chunkHeight * width;
-                            int numBytesRead = rowsRead * width;
-                            while (numBytesToRead > 0)
-                            {
-                                // Read may return anything from 0 to numBytesToRead.
-                                int n = reader.Read(alphaData, numBytesRead, numBytesToRead);
-                                // The end of the file is reached.
-                                if (n == 0)
+                                for (int y = 0; y < height; y++)
                                 {
-                                    break;
+                                    compressedRowLengths[y] = reader.ReadInt16();
                                 }
-                                numBytesRead += n;
-                                numBytesToRead -= n;
+
+                                for (int y = 0; y < chunkHeight; y++)
+                                {
+                                    int row = rowsRead + y;
+                                    RLEHelper.DecodedRow(reader, alphaData.Slice(row * width, width));
+                                }
                             }
-                        }
+                            else
+                            {
+                                int numBytesToRead = chunkHeight * width;
+                                int numBytesRead = rowsRead * width;
 
-                        rowsRemaining -= 16384;
-                        rowsRead += 16384;
+                                reader.ProperRead(alphaData.Slice(numBytesRead, numBytesToRead));
+                            }
 
-                    } while (rowsRemaining > 0);
+                            rowsRemaining -= 16384;
+                            rowsRead += 16384;
 
-                    brushes.Add(CreateSampledBrush(width, height, depth, alphaData, name, spacing));
+                        } while (rowsRemaining > 0);
+
+                        brushes.Add(CreateSampledBrush(width, height, depth, alphaData, name, spacing));
+                    }
                 }
                 else
                 {
@@ -329,53 +324,37 @@ namespace AbrFileTypePlugin
 
                         int height = bounds.Height;
                         int width = bounds.Width;
+                        Brush brush = null;
 
-                        byte[] alphaData = null;
+                        int alphaDataSize = depth == 16 ? checked(width * height * 2) : checked(width * height);
 
-                        if (compression == AbrImageCompression.RLE)
+                        using (SpanOwner<byte> alphaDataOwner = SpanOwner<byte>.Allocate(alphaDataSize))
                         {
-                            short[] compressedRowLengths = new short[height];
+                            Span<byte> alphaData = alphaDataOwner.Span;
 
-                            for (int y = 0; y < height; y++)
+                            if (compression == AbrImageCompression.RLE)
                             {
-                                compressedRowLengths[y] = reader.ReadInt16();
-                            }
+                                short[] compressedRowLengths = new short[height];
 
-                            int alphaDataSize = checked(width * height);
-                            int bytesPerRow = width;
-
-                            if (depth == 16)
-                            {
-                                checked
+                                for (int y = 0; y < height; y++)
                                 {
-                                    alphaDataSize *= 2;
-                                    bytesPerRow *= 2;
+                                    compressedRowLengths[y] = reader.ReadInt16();
+                                }
+
+                                int bytesPerRow = depth == 16 ? checked(width * 2) : width;
+
+                                for (int y = 0; y < height; y++)
+                                {
+                                    RLEHelper.DecodedRow(reader, alphaData.Slice(y * width, bytesPerRow));
                                 }
                             }
-
-                            alphaData = new byte[alphaDataSize];
-
-                            for (int y = 0; y < height; y++)
+                            else
                             {
-                                RLEHelper.DecodedRow(reader, alphaData, y * width, bytesPerRow);
-                            }
-                        }
-                        else
-                        {
-                            int alphaDataSize = checked(width * height);
-
-                            if (depth == 16)
-                            {
-                                checked
-                                {
-                                    alphaDataSize *= 2;
-                                }
+                                reader.ProperRead(alphaData);
                             }
 
-                            alphaData = reader.ReadBytes(alphaDataSize);
+                            brush = CreateSampledBrush(width, height, depth, alphaData, sampledBrush.Name, sampledBrush.Spacing);
                         }
-
-                        Brush brush = CreateSampledBrush(width, height, depth, alphaData, sampledBrush.Name, sampledBrush.Spacing);
 
                         brushes.Add(brush);
 
@@ -410,7 +389,12 @@ namespace AbrFileTypePlugin
             return brushes;
         }
 
-        private static unsafe Brush CreateSampledBrush(int width, int height, int depth, byte[] alphaData, string name, int spacing)
+        private static unsafe Brush CreateSampledBrush(int width,
+                                                       int height,
+                                                       int depth,
+                                                       ReadOnlySpan<byte> alphaData,
+                                                       string name,
+                                                       int spacing)
         {
             Brush brush = null;
             Brush tempBrush = null;

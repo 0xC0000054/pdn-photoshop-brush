@@ -42,35 +42,20 @@ namespace AbrFileTypePlugin
             private int idxPacketData;
             private int packetLength;
             private readonly Stream stream;
-            private byte[] data;
 
             private const int maxPacketLength = 128;
 
-            internal void Flush()
+            internal RlePacketStateMachine(Stream stream)
             {
-                byte header;
-                if (this.rlePacket)
-                {
-                    header = (byte)(-(this.packetLength - 1));
-                    this.stream.WriteByte(header);
-                    this.stream.WriteByte(this.lastValue);
-                }
-                else
-                {
-                    header = (byte)(this.packetLength - 1);
-                    this.stream.WriteByte(header);
-                    this.stream.Write(this.data, this.idxPacketData, this.packetLength);
-                }
-
-                this.packetLength = 0;
+                this.stream = stream;
             }
 
-            internal void PushRow(byte[] imgData, int startIdx, int endIdx)
+            internal void PushRow(ReadOnlySpan<byte> row)
             {
-                this.data = imgData;
-                for (int i = startIdx; i < endIdx; i++)
+                for (int i = 0; i < row.Length; i++)
                 {
-                    byte color = imgData[i];
+                    byte color = row[i];
+
                     if (this.packetLength == 0)
                     {
                         // Starting a fresh packet.
@@ -89,7 +74,7 @@ namespace AbrFileTypePlugin
                     else if (this.packetLength == maxPacketLength)
                     {
                         // Packet is full. Start a new one.
-                        Flush();
+                        Flush(row);
                         this.rlePacket = false;
                         this.lastValue = color;
                         this.idxPacketData = i;
@@ -99,7 +84,7 @@ namespace AbrFileTypePlugin
                     {
                         // We were filling in an RLE packet, and we got a non-repeated color.
                         // Emit the current packet and start a new one.
-                        Flush();
+                        Flush(row);
                         this.rlePacket = false;
                         this.lastValue = color;
                         this.idxPacketData = i;
@@ -124,40 +109,54 @@ namespace AbrFileTypePlugin
                         // Emit the current packet without its last color, and start a
                         // new RLE packet that starts with a length of 2.
                         this.packetLength--;
-                        Flush();
+                        Flush(row);
                         this.rlePacket = true;
                         this.packetLength = 2;
                         this.lastValue = color;
                     }
                 }
 
-                Flush();
+                Flush(row);
             }
 
-            internal RlePacketStateMachine(Stream stream)
+            private void Flush(ReadOnlySpan<byte> data)
             {
-                this.stream = stream;
+                byte header;
+                if (this.rlePacket)
+                {
+                    header = (byte)(-(this.packetLength - 1));
+                    this.stream.WriteByte(header);
+                    this.stream.WriteByte(this.lastValue);
+                }
+                else
+                {
+                    header = (byte)(this.packetLength - 1);
+                    this.stream.WriteByte(header);
+                    this.stream.Write(data.Slice(this.idxPacketData, this.packetLength));
+                }
+
+                this.packetLength = 0;
             }
         }
 
         ////////////////////////////////////////////////////////////////////////
 
-        public static int EncodedRow(Stream stream, byte[] imgData, int startIdx, int columns)
+        public static int EncodedRow(Stream stream, ReadOnlySpan<byte> row)
         {
             long startPosition = stream.Position;
 
             RlePacketStateMachine machine = new RlePacketStateMachine(stream);
-            machine.PushRow(imgData, startIdx, startIdx + columns);
+            machine.PushRow(row);
 
             return (int)(stream.Position - startPosition);
         }
 
         ////////////////////////////////////////////////////////////////////////
 
-        public static void DecodedRow(BigEndianBinaryReader reader, byte[] imgData, int startIdx, int columns)
+        public static void DecodedRow(BigEndianBinaryReader reader, Span<byte> destination)
         {
             int count = 0;
-            while (count < columns)
+            while (count < destination.Length)
             {
                 byte byteValue = reader.ReadByte();
 
@@ -166,7 +165,7 @@ namespace AbrFileTypePlugin
                 {
                     len++;
 
-                    reader.ProperRead(new Span<byte>(imgData, startIdx + count, len));
+                    reader.ProperRead(destination.Slice(count, len));
 
                     count += len;
                 }
@@ -179,7 +178,7 @@ namespace AbrFileTypePlugin
 
                     byteValue = reader.ReadByte();
 
-                    new Span<byte>(imgData, startIdx + count, len).Fill(byteValue);
+                    destination.Slice(count, len).Fill(byteValue);
 
                     count += len;
                 }

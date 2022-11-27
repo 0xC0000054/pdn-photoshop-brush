@@ -9,6 +9,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using CommunityToolkit.HighPerformance.Buffers;
 using PaintDotNet;
 using System;
 using System.Drawing;
@@ -98,62 +99,67 @@ namespace AbrFileTypePlugin
                 // Write the depth.
                 writer.Write((short)8);
 
-                byte[] alpha = GetBrushAlphaData(layer.Surface, imageBounds);
-
-                int rowsRemaining = imageBounds.Height;
-                int rowsRead = 0;
-                do
+                using (SpanOwner<byte> alphaOwner = SpanOwner<byte>.Allocate(imageBounds.Width * imageBounds.Height))
                 {
-                    // Brushes taller than 16384 pixels are split into 16384 line chunks.
-                    int chunkHeight = Math.Min(rowsRemaining, 16384);
+                    Span<byte> alpha = alphaOwner.Span;
 
-                    if (rle)
+                    GetBrushAlphaData(layer.Surface, imageBounds, alpha);
+
+                    int rowsRemaining = imageBounds.Height;
+                    int rowsRead = 0;
+                    do
                     {
-                        // Write the RLE compressed header.
-                        writer.Write((byte)AbrImageCompression.RLE);
+                        // Brushes taller than 16384 pixels are split into 16384 line chunks.
+                        int chunkHeight = Math.Min(rowsRemaining, 16384);
 
-                        long rowCountOffset = writer.BaseStream.Position;
-
-                        for (int i = 0; i < chunkHeight; i++)
+                        if (rle)
                         {
-                            // Placeholder for the row byte count.
-                            writer.Write(short.MaxValue);
+                            // Write the RLE compressed header.
+                            writer.Write((byte)AbrImageCompression.RLE);
+
+                            long rowCountOffset = writer.BaseStream.Position;
+
+                            for (int i = 0; i < chunkHeight; i++)
+                            {
+                                // Placeholder for the row byte count.
+                                writer.Write(short.MaxValue);
+                            }
+
+                            short[] rowByteCount = new short[chunkHeight];
+
+                            for (int y = 0; y < chunkHeight; y++)
+                            {
+                                int row = rowsRead + y;
+                                rowByteCount[y] = (short)RLEHelper.EncodedRow(writer.BaseStream, alpha.Slice(row * imageBounds.Width, imageBounds.Width));
+                            }
+
+                            long current = writer.BaseStream.Position;
+
+                            writer.BaseStream.Position = rowCountOffset;
+                            for (int i = 0; i < chunkHeight; i++)
+                            {
+                                writer.Write(rowByteCount[i]);
+                            }
+
+                            writer.BaseStream.Position = current;
+                        }
+                        else
+                        {
+                            // Write the uncompressed header.
+                            writer.Write((byte)AbrImageCompression.Raw);
+
+                            for (int y = 0; y < chunkHeight; y++)
+                            {
+                                int row = rowsRead + y;
+                                writer.Write(alpha.Slice(row * imageBounds.Width,imageBounds.Width));
+                            }
                         }
 
-                        short[] rowByteCount = new short[chunkHeight];
+                        rowsRemaining -= 16384;
+                        rowsRead += 16384;
 
-                        for (int y = 0; y < chunkHeight; y++)
-                        {
-                            int row = rowsRead + y;
-                            rowByteCount[y] = (short)RLEHelper.EncodedRow(writer.BaseStream, alpha, row * imageBounds.Width, imageBounds.Width);
-                        }
-
-                        long current = writer.BaseStream.Position;
-
-                        writer.BaseStream.Position = rowCountOffset;
-                        for (int i = 0; i < chunkHeight; i++)
-                        {
-                            writer.Write(rowByteCount[i]);
-                        }
-
-                        writer.BaseStream.Position = current;
-                    }
-                    else
-                    {
-                        // Write the uncompressed header.
-                        writer.Write((byte)AbrImageCompression.Raw);
-
-                        for (int y = 0; y < chunkHeight; y++)
-                        {
-                            int row = rowsRead + y;
-                            writer.Write(alpha, row * imageBounds.Width, imageBounds.Width);
-                        }
-                    }
-
-                    rowsRemaining -= 16384;
-                    rowsRead += 16384;
-
-                } while (rowsRemaining > 0);
+                    } while (rowsRemaining > 0);
+                }
             }
         }
 
@@ -204,14 +210,12 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private static unsafe byte[] GetBrushAlphaData(Surface surface, Rectangle imageBounds)
+        private static unsafe void GetBrushAlphaData(Surface surface, Rectangle imageBounds, Span<byte> destination)
         {
-            byte[] alpha = new byte[imageBounds.Width * imageBounds.Height];
-
             // The 'fixed' statement will throw an exception if the array length is zero.
-            if (alpha.Length > 0)
+            if (destination.Length > 0)
             {
-                fixed (byte* ptr = alpha)
+                fixed (byte* ptr = destination)
                 {
                     for (int y = 0; y < imageBounds.Height; y++)
                     {
@@ -228,8 +232,6 @@ namespace AbrFileTypePlugin
                     }
                 }
             }
-
-            return alpha;
         }
     }
 }
