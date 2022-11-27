@@ -13,6 +13,7 @@ using System;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
@@ -33,6 +34,8 @@ using System.Runtime.InteropServices;
 
 [assembly: CLSCompliant(false)]
 [assembly: NeutralResourcesLanguage("en-US")]
+
+[assembly: SupportedOSPlatform("windows")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("abc5deb9-2eca-4153-9e8a-993fb2beeb39")]

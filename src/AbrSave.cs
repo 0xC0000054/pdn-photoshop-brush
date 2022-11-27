@@ -166,7 +166,7 @@ namespace AbrFileTypePlugin
 
             for (int y = 0; y < surface.Height; y++)
             {
-                ColorBgra* p = surface.GetRowAddressUnchecked(y);
+                ColorBgra* p = surface.GetRowPointerUnchecked(y);
 
                 for (int x = 0; x < surface.Width; x++)
                 {
@@ -215,7 +215,7 @@ namespace AbrFileTypePlugin
                 {
                     for (int y = 0; y < imageBounds.Height; y++)
                     {
-                        ColorBgra* src = surface.GetPointAddressUnchecked(imageBounds.Left, imageBounds.Top + y);
+                        ColorBgra* src = surface.GetPointPointerUnchecked(imageBounds.Left, imageBounds.Top + y);
                         byte* dst = ptr + (y * imageBounds.Width);
 
                         for (int x = 0; x < imageBounds.Width; x++)

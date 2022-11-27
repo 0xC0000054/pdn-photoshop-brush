@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net35</TargetFramework>
+    <TargetFramework>net70-windows</TargetFramework>
     <OutputType>Library</OutputType>
     <RootNamespace>AbrFileTypePlugin</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -19,16 +19,25 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PaintDotNet.Base">
-      <HintPath>..\..\..\..\..\..\..\Dev_projects\PSFilterPdn\References\PaintDotNet.Base.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\paint.net 5.0\PaintDotNet.Base.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.ComponentModel">
+      <HintPath>..\..\..\..\..\..\..\paint.net 5.0\PaintDotNet.ComponentModel.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Core">
-      <HintPath>..\..\..\..\..\..\..\Dev_projects\PSFilterPdn\References\PaintDotNet.Core.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\paint.net 5.0\PaintDotNet.Core.dll</HintPath>
     </Reference>
     <Reference Include="PaintDotNet.Data">
-      <HintPath>..\..\..\..\..\..\..\Dev_projects\PSFilterPdn\References\PaintDotNet.Data.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\paint.net 5.0\PaintDotNet.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.Primitives">
+      <HintPath>..\..\..\..\..\..\..\paint.net 5.0\PaintDotNet.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="PaintDotNet.PropertySystem">
+      <HintPath>..\..\..\..\..\..\..\paint.net 5.0\PaintDotNet.PropertySystem.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\Program Files\paint.net\FileTypes&quot; /y" />
+    <Exec Command="copy &quot;$(TargetPath)&quot; &quot;D:\paint.net 5.0\FileTypes&quot; /y" />
   </Target>
 </Project>

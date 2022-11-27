@@ -24,8 +24,12 @@ namespace AbrFileTypePlugin
 
         public AbrFileType() : base(
             StaticName,
-            FileTypeFlags.SupportsLoading | FileTypeFlags.SupportsSaving | FileTypeFlags.SupportsLayers | FileTypeFlags.SavesWithProgress,
-            new string[] { ".abr" })
+            new FileTypeOptions
+            {
+                LoadExtensions = new string[] { ".abr" },
+                SaveExtensions = new string[] { ".abr" },
+                SupportsLayers = true,
+            })
         {
         }
 

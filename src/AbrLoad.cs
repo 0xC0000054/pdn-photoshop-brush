@@ -391,7 +391,7 @@ namespace AbrFileTypePlugin
                                 Size size = ComputeBrushSize(originalWidth, originalHeight, item.Diameter);
 
                                 Brush scaledBrush = new Brush(size.Width, size.Height, item.Name, item.Spacing);
-                                scaledBrush.Surface.FitSurface(ResamplingAlgorithm.SuperSampling, brush.Surface);
+                                scaledBrush.Surface.FitSurface(ResamplingAlgorithm.AdaptiveBestQuality, brush.Surface);
 
                                 brushes.Add(scaledBrush);
                             }
@@ -428,7 +428,7 @@ namespace AbrFileTypePlugin
                         for (int y = 0; y < height; y++)
                         {
                             byte* src = ptr + (y * srcStride);
-                            ColorBgra* dst = surface.GetRowAddressUnchecked(y);
+                            ColorBgra* dst = surface.GetRowPointerUnchecked(y);
 
                             for (int x = 0; x < width; x++)
                             {
@@ -448,7 +448,7 @@ namespace AbrFileTypePlugin
                         for (int y = 0; y < height; y++)
                         {
                             byte* src = ptr + (y * width);
-                            ColorBgra* dst = surface.GetRowAddressUnchecked(y);
+                            ColorBgra* dst = surface.GetRowPointerUnchecked(y);
                             for (int x = 0; x < width; x++)
                             {
                                 dst->B = dst->G = dst->R = 0;
