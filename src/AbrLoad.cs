@@ -215,12 +215,8 @@ namespace AbrFileTypePlugin
 
                             if (compression == AbrImageCompression.RLE)
                             {
-                                short[] compressedRowLengths = new short[height];
-
-                                for (int y = 0; y < height; y++)
-                                {
-                                    compressedRowLengths[y] = reader.ReadInt16();
-                                }
+                                // Skip the compressed row lengths
+                                reader.Position += (long)chunkHeight * sizeof(short);
 
                                 for (int y = 0; y < chunkHeight; y++)
                                 {
@@ -334,12 +330,8 @@ namespace AbrFileTypePlugin
 
                             if (compression == AbrImageCompression.RLE)
                             {
-                                short[] compressedRowLengths = new short[height];
-
-                                for (int y = 0; y < height; y++)
-                                {
-                                    compressedRowLengths[y] = reader.ReadInt16();
-                                }
+                                // Skip the compressed row lengths
+                                reader.Position += (long)height * sizeof(short);
 
                                 int bytesPerRow = depth == 16 ? checked(width * 2) : width;
 
