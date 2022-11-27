@@ -26,6 +26,7 @@
 //
 /////////////////////////////////////////////////////////////////////////////////
 
+using CommunityToolkit.HighPerformance.Buffers;
 using System;
 using System.Drawing;
 using System.IO;
@@ -431,11 +432,14 @@ namespace AbrFileTypePlugin
         /// Reads the ASCII string.
         /// </summary>
         /// <param name="length">The length of the ASCII string.</param>
+        /// <param name="useStringPool">
+        /// <see langword="true"/> if the string should be pooled; otherwise, <see langword="false"/>.
+        /// </param>
         /// <returns>A string containing the characters of the ASCII string.</returns>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="length"/> is less than zero.</exception>
         /// <exception cref="EndOfStreamException">The end of the stream has been reached.</exception>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
-        public string ReadAsciiString(int length)
+        public string ReadAsciiString(int length, bool useStringPool = false)
         {
             if (length < 0)
             {
@@ -467,7 +471,15 @@ namespace AbrFileTypePlugin
             }
             else
             {
-                result = Encoding.ASCII.GetString(this.buffer, this.readOffset, stringLength);
+                if (useStringPool)
+                {
+                    ReadOnlySpan<byte> span = new(this.buffer, this.readOffset, stringLength);
+                    result = StringPool.Shared.GetOrAdd(span, Encoding.ASCII);
+                }
+                else
+                {
+                    result = Encoding.ASCII.GetString(this.buffer, this.readOffset, stringLength);
+                }
             }
 
             this.readOffset += length;

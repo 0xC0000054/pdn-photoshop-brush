@@ -157,7 +157,7 @@ namespace AbrFileTypePlugin
                 length = 4;
             }
 
-            return reader.ReadAsciiString(length);
+            return reader.ReadAsciiString(length, useStringPool: true);
         }
 
         private static string ParseClassId(BigEndianBinaryReader reader)
