@@ -33,7 +33,7 @@ namespace AbrFileTypePlugin
             double progressPercentage = 0.0;
             double progressDelta = (1.0 / input.Layers.Count) * 100.0;
 
-            using (BigEndianBinaryWriter writer = new BigEndianBinaryWriter(output, true))
+            using (BigEndianBinaryWriter writer = new(output, true))
             {
                 writer.Write((short)fileVersion);
                 writer.Write((short)input.Layers.Count);

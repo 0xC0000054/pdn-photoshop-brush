@@ -40,7 +40,7 @@ namespace AbrFileTypePlugin
 
         public override PropertyCollection OnCreateSavePropertyCollection()
         {
-            List<Property> props = new List<Property>
+            List<Property> props = new()
             {
                 StaticListChoiceProperty.CreateForEnum(PropertyNames.FileVersion, AbrFileVersion.Version2, false),
                 new BooleanProperty(PropertyNames.RLE, true)

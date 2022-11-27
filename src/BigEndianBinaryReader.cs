@@ -526,7 +526,7 @@ namespace AbrFileTypePlugin
             VerifyNotDisposed();
 
 #pragma warning disable IDE0017 // Simplify object initialization
-            Rectangle rect = new Rectangle();
+            Rectangle rect = new();
 #pragma warning restore IDE0017 // Simplify object initialization
 
             rect.Y = ReadInt32();

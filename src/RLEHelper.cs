@@ -145,7 +145,7 @@ namespace AbrFileTypePlugin
         {
             long startPosition = stream.Position;
 
-            RlePacketStateMachine machine = new RlePacketStateMachine(stream);
+            RlePacketStateMachine machine = new(stream);
             machine.PushRow(row);
 
             return (int)(stream.Position - startPosition);

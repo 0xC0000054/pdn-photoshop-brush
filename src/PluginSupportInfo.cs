@@ -25,6 +25,6 @@ namespace AbrFileTypePlugin
 
         public Version Version => typeof(AbrFileType).Assembly.GetName().Version;
 
-        public Uri WebsiteUri => new Uri("https://forums.getpaint.net/index.php?/topic/25792-photoshop-brush-filetype/");
+        public Uri WebsiteUri => new("https://forums.getpaint.net/index.php?/topic/25792-photoshop-brush-filetype/");
     }
 }

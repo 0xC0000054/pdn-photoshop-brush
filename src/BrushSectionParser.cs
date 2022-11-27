@@ -285,7 +285,7 @@ namespace AbrFileTypePlugin
 
         private BrushData ParseSampledBrush(BigEndianBinaryReader reader, uint count)
         {
-            BrushData data = new BrushData();
+            BrushData data = new();
 
             for (uint i = 0; i < count; i++)
             {
@@ -335,7 +335,7 @@ namespace AbrFileTypePlugin
 
         private static UnitFloat ParseUnitFloat(BigEndianBinaryReader reader)
         {
-            UnitFloat value = new UnitFloat()
+            UnitFloat value = new()
             {
                 type = (UnitTypes)reader.ReadUInt32(),
                 value = reader.ReadDouble()
@@ -367,7 +367,7 @@ namespace AbrFileTypePlugin
 
         private static EnumeratedValue ParseEnumerated(BigEndianBinaryReader reader)
         {
-            EnumeratedValue value = new EnumeratedValue()
+            EnumeratedValue value = new()
             {
                 type = ParseKey(reader),
                 value = ParseKey(reader)
@@ -413,7 +413,7 @@ namespace AbrFileTypePlugin
         {
             uint value = (uint)type;
 
-            StringBuilder builder = new StringBuilder(32);
+            StringBuilder builder = new(32);
 
             builder.Append('\'');
             for (int i = 3; i >= 0; i--)

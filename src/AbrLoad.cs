@@ -36,7 +36,7 @@ namespace AbrFileTypePlugin
     {
         public static Document Load(Stream stream)
         {
-            using (BigEndianBinaryReader reader = new BigEndianBinaryReader(stream))
+            using (BigEndianBinaryReader reader = new(stream))
             {
                 List<Brush> brushes;
                 short version = reader.ReadInt16();
@@ -128,7 +128,7 @@ namespace AbrFileTypePlugin
         {
             short count = reader.ReadInt16();
 
-            List<Brush> brushes = new List<Brush>(count);
+            List<Brush> brushes = new(count);
 
             for (int i = 0; i < count; i++)
             {
@@ -269,9 +269,9 @@ namespace AbrFileTypePlugin
                     throw new FormatException(string.Format(CultureInfo.CurrentCulture, Resources.UnsupportedABRSubVersion, majorVersion, minorVersion));
             }
 
-            BrushSectionParser parser = new BrushSectionParser(reader);
+            BrushSectionParser parser = new(reader);
 
-            List<Brush> brushes = new List<Brush>(parser.SampledBrushes.Count);
+            List<Brush> brushes = new(parser.SampledBrushes.Count);
 
             long sampleSectionOffset = parser.SampleSectionOffset;
 
@@ -361,7 +361,7 @@ namespace AbrFileTypePlugin
                             {
                                 Size size = ComputeBrushSize(originalWidth, originalHeight, item.Diameter);
 
-                                Brush scaledBrush = new Brush(size.Width, size.Height, item.Name, item.Spacing);
+                                Brush scaledBrush = new(size.Width, size.Height, item.Name, item.Spacing);
                                 scaledBrush.Surface.FitSurface(ResamplingAlgorithm.AdaptiveBestQuality, brush.Surface);
 
                                 brushes.Add(scaledBrush);
