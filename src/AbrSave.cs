@@ -11,6 +11,8 @@
 
 using CommunityToolkit.HighPerformance.Buffers;
 using PaintDotNet;
+using PaintDotNet.Imaging;
+using PaintDotNet.Rendering;
 using System;
 using System.Drawing;
 using System.Globalization;
@@ -217,19 +219,16 @@ namespace AbrFileTypePlugin
             {
                 fixed (byte* ptr = destination)
                 {
-                    for (int y = 0; y < imageBounds.Height; y++)
-                    {
-                        ColorBgra* src = surface.GetPointPointerUnchecked(imageBounds.Left, imageBounds.Top + y);
-                        byte* dst = ptr + (y * imageBounds.Width);
+                    long windowOffset = ((long)imageBounds.Top * surface.Stride) + ((long)imageBounds.Left * ColorBgra.SizeOf);
 
-                        for (int x = 0; x < imageBounds.Width; x++)
-                        {
-                            *dst = src->A;
+                    RegionPtr<ColorBgra32> src = new(surface,
+                                                     (ColorBgra32*)((byte*)surface.Scan0.VoidStar + windowOffset),
+                                                     imageBounds.Width,
+                                                     imageBounds.Height,
+                                                     surface.Stride);
+                    RegionPtr<byte> dst = new(ptr, imageBounds.Width, imageBounds.Height, imageBounds.Width);
 
-                            src++;
-                            dst++;
-                        }
-                    }
+                    PixelKernels.ExtractChannel(dst, src, 3);
                 }
             }
         }
