@@ -127,23 +127,27 @@ namespace AbrFileTypePlugin
                                 writer.Write(short.MaxValue);
                             }
 
-                            short[] rowByteCount = new short[chunkHeight];
-
-                            for (int y = 0; y < chunkHeight; y++)
+                            using (SpanOwner<short> rowByteCountOwner = SpanOwner<short>.Allocate(chunkHeight))
                             {
-                                int row = rowsRead + y;
-                                rowByteCount[y] = (short)RLEHelper.EncodedRow(writer.BaseStream, alpha.Slice(row * imageBounds.Width, imageBounds.Width));
+                                Span<short> rowByteCount = rowByteCountOwner.Span;
+
+                                for (int y = 0; y < chunkHeight; y++)
+                                {
+                                    int row = rowsRead + y;
+                                    rowByteCount[y] = (short)RLEHelper.EncodedRow(writer.BaseStream, alpha.Slice(row * imageBounds.Width, imageBounds.Width));
+                                }
+
+                                long current = writer.BaseStream.Position;
+
+                                writer.BaseStream.Position = rowCountOffset;
+
+                                for (int i = 0; i < chunkHeight; i++)
+                                {
+                                    writer.Write(rowByteCount[i]);
+                                }
+
+                                writer.BaseStream.Position = current;
                             }
-
-                            long current = writer.BaseStream.Position;
-
-                            writer.BaseStream.Position = rowCountOffset;
-                            for (int i = 0; i < chunkHeight; i++)
-                            {
-                                writer.Write(rowByteCount[i]);
-                            }
-
-                            writer.BaseStream.Position = current;
                         }
                         else
                         {
