@@ -141,14 +141,14 @@ namespace AbrFileTypePlugin
 
         ////////////////////////////////////////////////////////////////////////
 
-        public static int EncodedRow(Stream stream, ReadOnlySpan<byte> row)
+        public static long EncodedRow(Stream stream, ReadOnlySpan<byte> row)
         {
             long startPosition = stream.Position;
 
             RlePacketStateMachine machine = new(stream);
             machine.PushRow(row);
 
-            return (int)(stream.Position - startPosition);
+            return stream.Position - startPosition;
         }
 
         ////////////////////////////////////////////////////////////////////////

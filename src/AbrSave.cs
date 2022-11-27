@@ -133,8 +133,10 @@ namespace AbrFileTypePlugin
 
                                 for (int y = 0; y < chunkHeight; y++)
                                 {
-                                    int row = rowsRead + y;
-                                    rowByteCount[y] = (short)RLEHelper.EncodedRow(writer.BaseStream, alpha.Slice(row * imageBounds.Width, imageBounds.Width));
+                                    int currentRow = rowsRead + y;
+                                    Span<byte> row = alpha.Slice(currentRow * imageBounds.Width, imageBounds.Width);
+
+                                    rowByteCount[y] = checked((short)RLEHelper.EncodedRow(writer.BaseStream, row));
                                 }
 
                                 long current = writer.BaseStream.Position;
