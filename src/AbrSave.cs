@@ -66,9 +66,9 @@ namespace AbrFileTypePlugin
                 string spacingMetaData = layer.Metadata.GetUserValue(AbrMetadataNames.BrushSpacing);
 
                 if (spacingMetaData != null &&
-                    int.TryParse(spacingMetaData, NumberStyles.Number, CultureInfo.InvariantCulture, out int spacing))
+                    short.TryParse(spacingMetaData, NumberStyles.Number, CultureInfo.InvariantCulture, out short spacing))
                 {
-                    writer.Write((short)spacing);
+                    writer.Write(spacing);
                 }
                 else
                 {
