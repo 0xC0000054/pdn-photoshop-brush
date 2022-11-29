@@ -22,6 +22,8 @@
 using AbrFileTypePlugin.Properties;
 using CommunityToolkit.HighPerformance.Buffers;
 using PaintDotNet;
+using PaintDotNet.Imaging;
+using PaintDotNet.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -394,6 +396,7 @@ namespace AbrFileTypePlugin
             {
                 tempBrush = new Brush(width, height, name, spacing);
                 Surface surface = tempBrush.Surface;
+                surface.Clear();
 
                 fixed (byte* ptr = alphaData)
                 {
@@ -409,7 +412,6 @@ namespace AbrFileTypePlugin
                             {
                                 ushort val = (ushort)((src[0] << 8) | src[1]);
 
-                                dst->B = dst->G = dst->R = 0;
                                 // The 16-bit brush data is stored in the range of [0, 32768].
                                 dst->A = (byte)((val * 10) / 1285);
 
@@ -420,19 +422,14 @@ namespace AbrFileTypePlugin
                     }
                     else
                     {
-                        for (int y = 0; y < height; y++)
-                        {
-                            byte* src = ptr + (y * width);
-                            ColorBgra* dst = surface.GetRowPointerUnchecked(y);
-                            for (int x = 0; x < width; x++)
-                            {
-                                dst->B = dst->G = dst->R = 0;
-                                dst->A = *src;
+                        RegionPtr<byte> src = new(ptr, width, height, width);
+                        RegionPtr<ColorBgra32> dst = new(surface,
+                                                         (ColorBgra32*)surface.Scan0.VoidStar,
+                                                         width,
+                                                         height,
+                                                         surface.Stride);
 
-                                src++;
-                                dst++;
-                            }
-                        }
+                        PixelKernels.ReplaceChannel(dst, src, 3);
                     }
                 }
 
