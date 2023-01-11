@@ -28,6 +28,7 @@
 
 using CommunityToolkit.HighPerformance.Buffers;
 using System;
+using System.Buffers;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -453,36 +454,53 @@ namespace AbrFileTypePlugin
                 return string.Empty;
             }
 
-            EnsureBuffer(length);
+            Span<byte> stringData;
+            byte[] arrayFromPool = null;
 
-            int stringLength = length;
-
-            // Skip any NUL characters at the end of the string.
-            while (stringLength > 0 && this.buffer[this.readOffset + stringLength - 1] == 0)
+            if (length <= this.bufferSize)
             {
-                stringLength--;
+                EnsureBuffer(length);
+                stringData = new Span<byte>(this.buffer, this.readOffset, length);
+
+                this.readOffset += length;
+            }
+            else
+            {
+                arrayFromPool = ArrayPool<byte>.Shared.Rent(length);
+                stringData = new Span<byte>(arrayFromPool, 0, length);
+                ProperRead(stringData);
             }
 
             string result;
 
-            if (stringLength == 0)
+            try
             {
-                result = string.Empty;
-            }
-            else
-            {
-                if (useStringPool)
+                // Skip any NUL characters at the end of the string.
+                stringData = stringData.TrimEnd((byte)0);
+
+                if (stringData.Length == 0)
                 {
-                    ReadOnlySpan<byte> span = new(this.buffer, this.readOffset, stringLength);
-                    result = StringPool.Shared.GetOrAdd(span, Encoding.ASCII);
+                    result = string.Empty;
                 }
                 else
                 {
-                    result = Encoding.ASCII.GetString(this.buffer, this.readOffset, stringLength);
+                    if (useStringPool)
+                    {
+                        result = StringPool.Shared.GetOrAdd(stringData, Encoding.ASCII);
+                    }
+                    else
+                    {
+                        result = Encoding.ASCII.GetString(stringData);
+                    }
                 }
             }
-
-            this.readOffset += length;
+            finally
+            {
+                if (arrayFromPool != null)
+                {
+                    ArrayPool<byte>.Shared.Return(arrayFromPool);
+                }
+            }
 
             return result;
         }
@@ -556,30 +574,46 @@ namespace AbrFileTypePlugin
 
             int lengthInBytes = checked(lengthInChars * 2);
 
-            EnsureBuffer(lengthInBytes);
+            Span<byte> stringData;
+            byte[] arrayFromPool = null;
 
-            int stringLengthInBytes = lengthInBytes;
-
-            // Skip any UTF-16 NUL characters at the end of the string.
-            while (stringLengthInBytes > 0
-                   && this.buffer[this.readOffset + stringLengthInBytes - 1] == 0
-                   && this.buffer[this.readOffset + stringLengthInBytes - 2] == 0)
+            if (lengthInBytes <= this.bufferSize)
             {
-                stringLengthInBytes -= 2;
+                EnsureBuffer(lengthInBytes);
+                stringData = new Span<byte>(this.buffer, this.readOffset, lengthInBytes);
+
+                this.readOffset += lengthInBytes;
+            }
+            else
+            {
+                arrayFromPool = ArrayPool<byte>.Shared.Rent(lengthInBytes);
+                stringData = new Span<byte>(arrayFromPool, 0, lengthInBytes);
+                ProperRead(stringData);
             }
 
             string result;
 
-            if (stringLengthInBytes == 0)
+            try
             {
-                result = string.Empty;
-            }
-            else
-            {
-                result = Encoding.BigEndianUnicode.GetString(this.buffer, this.readOffset, stringLengthInBytes);
-            }
+                // Skip any NUL characters at the end of the string.
+                stringData = stringData.TrimEnd((byte)0);
 
-            this.readOffset += lengthInBytes;
+                if (stringData.Length == 0)
+                {
+                    result = string.Empty;
+                }
+                else
+                {
+                    result = Encoding.BigEndianUnicode.GetString(stringData);
+                }
+            }
+            finally
+            {
+                if (arrayFromPool != null)
+                {
+                    ArrayPool<byte>.Shared.Return(arrayFromPool);
+                }
+            }
 
             return result;
         }
