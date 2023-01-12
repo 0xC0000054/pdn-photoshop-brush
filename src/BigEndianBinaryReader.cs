@@ -242,14 +242,19 @@ namespace AbrFileTypePlugin
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
         public byte ReadByte()
         {
-            VerifyNotDisposed();
+            return this.readOffset < this.readLength ? this.buffer[this.readOffset++] : ReadByteSlow();
 
-            EnsureBuffer(sizeof(byte));
+            byte ReadByteSlow()
+            {
+                VerifyNotDisposed();
 
-            byte val = this.buffer[this.readOffset];
-            this.readOffset += sizeof(byte);
+                FillBuffer(sizeof(byte));
 
-            return val;
+                byte val = this.buffer[this.readOffset];
+                this.readOffset += sizeof(byte);
+
+                return val;
+            }
         }
 
         /// <summary>
