@@ -271,7 +271,7 @@ namespace AbrFileTypePlugin
 
             if (count == 0)
             {
-                return EmptyArray<byte>.Value;
+                return Array.Empty<byte>();
             }
 
             byte[] bytes = new byte[count];
@@ -757,11 +757,6 @@ namespace AbrFileTypePlugin
             {
                 throw new ObjectDisposedException(nameof(BigEndianBinaryReader));
             }
-        }
-
-        private static class EmptyArray<T>
-        {
-            public static readonly T[] Value = new T[0];
         }
     }
 }
