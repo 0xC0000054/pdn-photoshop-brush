@@ -363,7 +363,7 @@ namespace AbrFileTypePlugin
                                 Size size = ComputeBrushSize(originalWidth, originalHeight, item.Diameter);
 
                                 Brush scaledBrush = new(size.Width, size.Height, item.Name, item.Spacing);
-                                scaledBrush.Surface.FitSurface(ResamplingAlgorithm.AdaptiveBestQuality, brush.Surface);
+                                scaledBrush.Surface.FitSurface(ResamplingAlgorithm.AdaptiveHighQuality, brush.Surface);
 
                                 brushes.Add(scaledBrush);
                             }
