@@ -28,6 +28,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="PaintDotNet.Base">
       <HintPath>..\..\..\..\..\..\..\Program Files\paint.net\PaintDotNet.Base.dll</HintPath>
     </Reference>
