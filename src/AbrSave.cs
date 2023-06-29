@@ -30,6 +30,16 @@ namespace AbrFileTypePlugin
 
         public static unsafe void Save(Document input, Stream output, PropertyBasedSaveConfigToken token, ProgressEventHandler progressCallback)
         {
+            if (input.Layers.Count > short.MaxValue)
+            {
+                throw new FormatException($"The document must not have more than 32767 layers.");
+            }
+
+            if (input.Width > short.MaxValue || input.Height > short.MaxValue)
+            {
+                throw new FormatException($"The document dimensions must be 32767x32767 or less.");
+            }
+
             bool rle = token.GetProperty<PaintDotNet.PropertySystem.BooleanProperty>(PropertyNames.RLE).Value;
             AbrFileVersion fileVersion = (AbrFileVersion)token.GetProperty(PropertyNames.FileVersion).Value;
 
