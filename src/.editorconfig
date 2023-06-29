@@ -54,6 +54,9 @@ csharp_style_var_elsewhere                                               = false
 csharp_style_var_for_built_in_types                                      = false : silent
 csharp_style_var_when_type_is_apparent                                   = false : silent
 
+# IDE0057: Use range operator
+csharp_style_prefer_range_operator = false:suggestion
+
 [*.{cs,vb}]
 dotnet_sort_system_directives_first                              = false
 dotnet_style_coalesce_expression                                 = true : suggestion
