@@ -14,6 +14,7 @@ using PaintDotNet;
 using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -32,19 +33,23 @@ namespace AbrFileTypePlugin
             bool rle = token.GetProperty<PaintDotNet.PropertySystem.BooleanProperty>(PropertyNames.RLE).Value;
             AbrFileVersion fileVersion = (AbrFileVersion)token.GetProperty(PropertyNames.FileVersion).Value;
 
+            List<(int index, Rectangle saveBounds)> nonEmptyLayers = GetNonEmptyLayers(input);
+
             double progressPercentage = 0.0;
-            double progressDelta = (1.0 / input.Layers.Count) * 100.0;
+            double progressDelta = (1.0 / nonEmptyLayers.Count) * 100.0;
 
             using (BigEndianBinaryWriter writer = new(output, true))
             {
                 writer.Write((short)fileVersion);
-                writer.Write((short)input.Layers.Count);
+                writer.Write((short)nonEmptyLayers.Count);
 
-                foreach (Layer item in input.Layers)
+                LayerList layers = input.Layers;
+
+                foreach ((int index, Rectangle saveBounds) in nonEmptyLayers)
                 {
-                    BitmapLayer layer = (BitmapLayer)item;
+                    BitmapLayer layer = (BitmapLayer)layers[index];
 
-                    SaveLayer(writer, layer, fileVersion, rle);
+                    SaveLayer(writer, layer, saveBounds, fileVersion, rle);
 
                     progressPercentage += progressDelta;
 
@@ -53,7 +58,101 @@ namespace AbrFileTypePlugin
             }
         }
 
-        private static void SaveLayer(BigEndianBinaryWriter writer, BitmapLayer layer, AbrFileVersion fileVersion, bool rle)
+        private static unsafe Rectangle GetImageRectangle(Surface surface)
+        {
+            int top = surface.Height;
+            int left = surface.Width;
+            int right = 0;
+            int bottom = 0;
+
+            for (int y = 0; y < surface.Height; y++)
+            {
+                ColorBgra* p = surface.GetRowPointerUnchecked(y);
+
+                for (int x = 0; x < surface.Width; x++)
+                {
+                    // Get the smallest rectangle containing image data.
+                    if (p->A > 0)
+                    {
+                        if (y < top)
+                        {
+                            top = y;
+                        }
+                        if (x < left)
+                        {
+                            left = x;
+                        }
+                        if (y > bottom)
+                        {
+                            bottom = y;
+                        }
+                        if (x > right)
+                        {
+                            right = x;
+                        }
+                    }
+                    p++;
+                }
+            }
+
+            if (top < surface.Height && left < surface.Width)
+            {
+                return new Rectangle(left, top, (right - left) + 1, (bottom - top) + 1);
+            }
+            else
+            {
+                return Rectangle.Empty;
+            }
+        }
+
+        private static List<(int index, Rectangle saveBounds)> GetNonEmptyLayers(Document input)
+        {
+            LayerList layers = input.Layers;
+
+            // Assume that the document does not contain any empty layers.
+            List<(int, Rectangle)> nonEmptyLayers = new(layers.Count);
+
+            for (int i = 0; i < layers.Count; i++)
+            {
+                BitmapLayer layer = (BitmapLayer)layers[i];
+
+                Rectangle saveBounds = GetImageRectangle(layer.Surface);
+
+                if (!saveBounds.IsEmpty)
+                {
+                    nonEmptyLayers.Add((i, saveBounds));
+                }
+            }
+
+            return nonEmptyLayers;
+        }
+
+        private static unsafe void GetBrushAlphaData(Surface surface, Rectangle imageBounds, Span<byte> destination)
+        {
+            // The 'fixed' statement will throw an exception if the array length is zero.
+            if (destination.Length > 0)
+            {
+                fixed (byte* ptr = destination)
+                {
+                    long windowOffset = ((long)imageBounds.Top * surface.Stride) + ((long)imageBounds.Left * ColorBgra.SizeOf);
+
+                    RegionPtr<ColorBgra32> src = new(surface,
+                                                     (ColorBgra32*)((byte*)surface.Scan0.VoidStar + windowOffset),
+                                                     imageBounds.Width,
+                                                     imageBounds.Height,
+                                                     surface.Stride);
+                    RegionPtr<byte> dst = new(ptr, imageBounds.Width, imageBounds.Height, imageBounds.Width);
+
+                    PixelKernels.ExtractChannel(dst, src, 3);
+                }
+            }
+        }
+
+        private static void SaveLayer(BigEndianBinaryWriter writer,
+                                      BitmapLayer layer,
+                                      Rectangle imageBounds,
+                                      AbrFileVersion fileVersion,
+                                      bool rle)
         {
             writer.Write((short)AbrBrushType.Sampled);
 
@@ -80,8 +179,6 @@ namespace AbrFileTypePlugin
                 {
                     writer.WriteUnicodeString(layer.Name);
                 }
-
-                Rectangle imageBounds = GetImageRectangle(layer.Surface);
 
                 // Write the anti-aliasing.
                 if (imageBounds.Width < 32 && imageBounds.Height < 32)
@@ -167,74 +264,6 @@ namespace AbrFileTypePlugin
                         rowsRead += 16384;
 
                     } while (rowsRemaining > 0);
-                }
-            }
-        }
-
-        private static unsafe Rectangle GetImageRectangle(Surface surface)
-        {
-            int top = surface.Height;
-            int left = surface.Width;
-            int right = 0;
-            int bottom = 0;
-
-            for (int y = 0; y < surface.Height; y++)
-            {
-                ColorBgra* p = surface.GetRowPointerUnchecked(y);
-
-                for (int x = 0; x < surface.Width; x++)
-                {
-                    // Get the smallest rectangle containing image data.
-                    if (p->A > 0)
-                    {
-                        if (y < top)
-                        {
-                            top = y;
-                        }
-                        if (x < left)
-                        {
-                            left = x;
-                        }
-                        if (y > bottom)
-                        {
-                            bottom = y;
-                        }
-                        if (x > right)
-                        {
-                            right = x;
-                        }
-                    }
-                    p++;
-                }
-            }
-
-            if (top < surface.Height && left < surface.Width)
-            {
-                return new Rectangle(left, top, (right - left) + 1, (bottom - top) + 1);
-            }
-            else
-            {
-                return Rectangle.Empty;
-            }
-        }
-
-        private static unsafe void GetBrushAlphaData(Surface surface, Rectangle imageBounds, Span<byte> destination)
-        {
-            // The 'fixed' statement will throw an exception if the array length is zero.
-            if (destination.Length > 0)
-            {
-                fixed (byte* ptr = destination)
-                {
-                    long windowOffset = ((long)imageBounds.Top * surface.Stride) + ((long)imageBounds.Left * ColorBgra.SizeOf);
-
-                    RegionPtr<ColorBgra32> src = new(surface,
-                                                     (ColorBgra32*)((byte*)surface.Scan0.VoidStar + windowOffset),
-                                                     imageBounds.Width,
-                                                     imageBounds.Height,
-                                                     surface.Stride);
-                    RegionPtr<byte> dst = new(ptr, imageBounds.Width, imageBounds.Height, imageBounds.Width);
-
-                    PixelKernels.ExtractChannel(dst, src, 3);
                 }
             }
         }
