@@ -25,11 +25,13 @@ using PaintDotNet;
 using PaintDotNet.Imaging;
 using PaintDotNet.Rendering;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AbrFileTypePlugin
 {
@@ -410,10 +412,10 @@ namespace AbrFileTypePlugin
 
                             for (int x = 0; x < width; x++)
                             {
-                                ushort val = (ushort)((src[0] << 8) | src[1]);
+                                ushort value = ReadUInt16BigEndian(src);
 
                                 // The 16-bit brush data is stored in the range of [0, 32768].
-                                dst->A = (byte)((val * 10) / 1285);
+                                dst->A = (byte)((value * 10) / 1285);
 
                                 src += 2;
                                 dst++;
@@ -446,6 +448,13 @@ namespace AbrFileTypePlugin
             }
 
             return brush;
+
+            static unsafe ushort ReadUInt16BigEndian(byte* ptr)
+            {
+                ushort value = Unsafe.ReadUnaligned<ushort>(ref *ptr);
+
+                return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
+            }
         }
 
         private static Size ComputeBrushSize(int originalWidth, int originalHeight, int maxEdgeLength)
