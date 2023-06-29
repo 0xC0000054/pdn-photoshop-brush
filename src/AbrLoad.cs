@@ -341,7 +341,7 @@ namespace AbrFileTypePlugin
 
                                 for (int y = 0; y < height; y++)
                                 {
-                                    RLEHelper.DecodedRow(reader, alphaData.Slice(y * width, bytesPerRow));
+                                    RLEHelper.DecodedRow(reader, alphaData.Slice(y * bytesPerRow, bytesPerRow));
                                 }
                             }
                             else
