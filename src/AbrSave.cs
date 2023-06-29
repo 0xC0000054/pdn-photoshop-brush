@@ -226,7 +226,7 @@ namespace AbrFileTypePlugin
                             // Write the RLE compressed header.
                             writer.Write((byte)AbrImageCompression.RLE);
 
-                            long rowCountOffset = writer.BaseStream.Position;
+                            long rowCountOffset = writer.Position;
 
                             for (int i = 0; i < chunkHeight; i++)
                             {
@@ -243,19 +243,19 @@ namespace AbrFileTypePlugin
                                     int currentRow = rowsRead + y;
                                     Span<byte> row = alpha.Slice(currentRow * imageBounds.Width, imageBounds.Width);
 
-                                    rowByteCount[y] = checked((short)RLEHelper.EncodedRow(writer.BaseStream, row));
+                                    rowByteCount[y] = checked((short)RLEHelper.EncodedRow(writer, row));
                                 }
 
-                                long current = writer.BaseStream.Position;
+                                long current = writer.Position;
 
-                                writer.BaseStream.Position = rowCountOffset;
+                                writer.Position = rowCountOffset;
 
                                 for (int i = 0; i < chunkHeight; i++)
                                 {
                                     writer.Write(rowByteCount[i]);
                                 }
 
-                                writer.BaseStream.Position = current;
+                                writer.Position = current;
                             }
                         }
                         else

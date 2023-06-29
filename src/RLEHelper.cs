@@ -41,13 +41,13 @@ namespace AbrFileTypePlugin
             private byte lastValue;
             private int idxPacketData;
             private int packetLength;
-            private readonly Stream stream;
+            private readonly BigEndianBinaryWriter writer;
 
             private const int maxPacketLength = 128;
 
-            internal RlePacketStateMachine(Stream stream)
+            internal RlePacketStateMachine(BigEndianBinaryWriter writer)
             {
-                this.stream = stream;
+                this.writer = writer;
             }
 
             internal void PushRow(ReadOnlySpan<byte> row)
@@ -125,14 +125,14 @@ namespace AbrFileTypePlugin
                 if (this.rlePacket)
                 {
                     header = (byte)(-(this.packetLength - 1));
-                    this.stream.WriteByte(header);
-                    this.stream.WriteByte(this.lastValue);
+                    this.writer.Write(header);
+                    this.writer.Write(this.lastValue);
                 }
                 else
                 {
                     header = (byte)(this.packetLength - 1);
-                    this.stream.WriteByte(header);
-                    this.stream.Write(data.Slice(this.idxPacketData, this.packetLength));
+                    this.writer.Write(header);
+                    this.writer.Write(data.Slice(this.idxPacketData, this.packetLength));
                 }
 
                 this.packetLength = 0;
@@ -141,14 +141,14 @@ namespace AbrFileTypePlugin
 
         ////////////////////////////////////////////////////////////////////////
 
-        public static long EncodedRow(Stream stream, ReadOnlySpan<byte> row)
+        public static long EncodedRow(BigEndianBinaryWriter writer, ReadOnlySpan<byte> row)
         {
-            long startPosition = stream.Position;
+            long startPosition = writer.Position;
 
-            RlePacketStateMachine machine = new(stream);
+            RlePacketStateMachine machine = new(writer);
             machine.PushRow(row);
 
-            return stream.Position - startPosition;
+            return writer.Position - startPosition;
         }
 
         ////////////////////////////////////////////////////////////////////////

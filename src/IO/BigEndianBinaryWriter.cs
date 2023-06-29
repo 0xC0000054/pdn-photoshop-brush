@@ -54,22 +54,25 @@ namespace AbrFileTypePlugin
         }
 
         /// <summary>
-        /// Gets the underlying stream of the <see cref="BigEndianBinaryWriter"/>.
+        /// Gets or sets the position of the underlying stream.
         /// </summary>
         /// <value>
-        /// The underlying stream of the <see cref="BigEndianBinaryWriter"/>.
+        /// The position of the underlying stream.
         /// </value>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
-        public Stream BaseStream
+        public long Position
         {
             get
             {
                 VerifyNotDisposed();
 
-                // Force the stream to write any buffered data.
-                this.stream.Flush();
+                return this.stream.Position;
+            }
+            set
+            {
+                VerifyNotDisposed();
 
-                return this.stream;
+                this.stream.Position = value;
             }
         }
 

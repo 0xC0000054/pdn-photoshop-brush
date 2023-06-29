@@ -42,12 +42,12 @@ namespace AbrFileTypePlugin
             this.writer = writer;
             // we will write the correct length later, so remember
             // the position
-            this.lengthFieldOffset = writer.BaseStream.Position;
+            this.lengthFieldOffset = writer.Position;
             writer.Write(0xFEEDFEED);
 
             // remember the start  position for calculation Image
             // resources length
-            this.startPosition = writer.BaseStream.Position;
+            this.startPosition = writer.Position;
             this.disposed = false;
         }
 
@@ -55,13 +55,13 @@ namespace AbrFileTypePlugin
         {
             if (!this.disposed)
             {
-                long endPosition = this.writer.BaseStream.Position;
+                long endPosition = this.writer.Position;
                 long length = endPosition - this.startPosition;
 
-                this.writer.BaseStream.Position = this.lengthFieldOffset;
+                this.writer.Position = this.lengthFieldOffset;
                 this.writer.Write((uint)length);
 
-                this.writer.BaseStream.Position = endPosition;
+                this.writer.Position = endPosition;
 
                 this.disposed = true;
             }
