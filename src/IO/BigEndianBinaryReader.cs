@@ -29,8 +29,10 @@
 using CommunityToolkit.HighPerformance.Buffers;
 using System;
 using System.Buffers;
+using System.Buffers.Binary;
 using System.Drawing;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace AbrFileTypePlugin
@@ -356,10 +358,10 @@ namespace AbrFileTypePlugin
 
             EnsureBuffer(sizeof(ushort));
 
-            ushort val = (ushort)((this.buffer[this.readOffset] << 8) | this.buffer[this.readOffset + 1]);
+            ushort value = Unsafe.ReadUnaligned<ushort>(ref this.buffer[this.readOffset]);
             this.readOffset += sizeof(ushort);
 
-            return val;
+            return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
         }
 
         /// <summary>
@@ -385,10 +387,10 @@ namespace AbrFileTypePlugin
 
             EnsureBuffer(sizeof(uint));
 
-            uint val = (uint)((this.buffer[this.readOffset] << 24) | (this.buffer[this.readOffset + 1] << 16) | (this.buffer[this.readOffset + 2] << 8) | this.buffer[this.readOffset + 3]);
+            uint value = Unsafe.ReadUnaligned<uint>(ref this.buffer[this.readOffset]);
             this.readOffset += sizeof(uint);
 
-            return val;
+            return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
         }
 
         /// <summary>
@@ -427,11 +429,10 @@ namespace AbrFileTypePlugin
 
             EnsureBuffer(sizeof(ulong));
 
-            uint hi = (uint)((this.buffer[this.readOffset] << 24) | (this.buffer[this.readOffset + 1] << 16) | (this.buffer[this.readOffset + 2] << 8) | this.buffer[this.readOffset + 3]);
-            uint lo = (uint)((this.buffer[this.readOffset + 4] << 24) | (this.buffer[this.readOffset + 5] << 16) | (this.buffer[this.readOffset + 6] << 8) | this.buffer[this.readOffset + 7]);
+            ulong value = Unsafe.ReadUnaligned<ulong>(ref this.buffer[this.readOffset]);
             this.readOffset += sizeof(ulong);
 
-            return (((ulong)hi) << 32) | lo;
+            return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
         }
 
         /// <summary>
