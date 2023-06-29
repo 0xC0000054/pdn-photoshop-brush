@@ -600,8 +600,17 @@ namespace AbrFileTypePlugin
 
             try
             {
-                // Skip any NUL characters at the end of the string.
-                stringData = stringData.TrimEnd((byte)0);
+                int stringLengthInBytes = lengthInBytes;
+
+                // Skip any UTF-16 NUL characters at the end of the string.
+                while (stringLengthInBytes > 0
+                       && stringData[stringLengthInBytes - 1] == 0
+                       && stringData[stringLengthInBytes - 2] == 0)
+                {
+                    stringLengthInBytes -= 2;
+                }
+
+                stringData = stringData.Slice(0, stringLengthInBytes);
 
                 if (stringData.Length == 0)
                 {
