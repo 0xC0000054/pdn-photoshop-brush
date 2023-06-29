@@ -27,6 +27,7 @@ using PaintDotNet.Rendering;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -414,8 +415,7 @@ namespace AbrFileTypePlugin
                             {
                                 ushort value = ReadUInt16BigEndian(src);
 
-                                // The 16-bit brush data is stored in the range of [0, 32768].
-                                dst->A = (byte)((value * 10) / 1285);
+                                dst->A = SixteenBitConversion.GetEightBitValue(value);
 
                                 src += 2;
                                 dst++;
@@ -514,6 +514,32 @@ namespace AbrFileTypePlugin
                     this.surface.Dispose();
                     this.surface = null;
                 }
+            }
+        }
+
+        private static class SixteenBitConversion
+        {
+            private static readonly ImmutableArray<byte> EightBitLookupTable = CreateEightBitLookupTable();
+
+            public static byte GetEightBitValue(ushort value)
+            {
+                // The 16-bit brush data is stored in the range of [0, 32768].
+                // Because an unsigned value can never be negative we only need to clamp
+                // to the upper bound of the lookup table.
+                return EightBitLookupTable[Math.Min((int)value, 32768)];
+            }
+
+            private static ImmutableArray<byte> CreateEightBitLookupTable()
+            {
+                ImmutableArray<byte>.Builder builder = ImmutableArray.CreateBuilder<byte>(32769);
+
+                for (int i = 0; i < builder.Capacity; i++)
+                {
+                    // The 16-bit brush data is stored in the range of [0, 32768].
+                    builder.Add((byte)((i * 10) / 1285));
+                }
+
+                return builder.MoveToImmutable();
             }
         }
     }
