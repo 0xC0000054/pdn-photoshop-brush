@@ -27,8 +27,10 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Buffers.Binary;
 using System.Drawing;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace AbrFileTypePlugin
@@ -39,7 +41,6 @@ namespace AbrFileTypePlugin
         private Stream stream;
 #pragma warning restore IDE0032
 
-        private readonly byte[] buffer;
         private readonly bool leaveOpen;
 
         /// <summary>
@@ -51,7 +52,6 @@ namespace AbrFileTypePlugin
         public BigEndianBinaryWriter(Stream stream, bool leaveOpen)
         {
             this.stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            this.buffer = new byte[sizeof(double)];
             this.leaveOpen = leaveOpen;
         }
 
@@ -104,14 +104,14 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        [SkipLocalsInit]
         public void Write(short value)
         {
             VerifyNotDisposed();
 
-            this.buffer[0] = (byte)(value >> 8);
-            this.buffer[1] = (byte)value;
-
-            this.stream.Write(this.buffer, 0, 2);
+            Span<byte> buffer = stackalloc byte[sizeof(short)];
+            BinaryPrimitives.WriteInt16BigEndian(buffer, value);
+            this.stream.Write(buffer);
         }
 
         /// <summary>
@@ -119,16 +119,14 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        [SkipLocalsInit]
         public void Write(int value)
         {
             VerifyNotDisposed();
 
-            this.buffer[0] = (byte)(value >> 24);
-            this.buffer[1] = (byte)(value >> 16);
-            this.buffer[2] = (byte)(value >> 8);
-            this.buffer[3] = (byte)value;
-
-            this.stream.Write(this.buffer, 0, 4);
+            Span<byte> buffer = stackalloc byte[sizeof(int)];
+            BinaryPrimitives.WriteInt32BigEndian(buffer, value);
+            this.stream.Write(buffer);
         }
 
         /// <summary>
@@ -136,20 +134,14 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        [SkipLocalsInit]
         public void Write(long value)
         {
             VerifyNotDisposed();
 
-            this.buffer[0] = (byte)(value >> 56);
-            this.buffer[1] = (byte)(value >> 48);
-            this.buffer[2] = (byte)(value >> 40);
-            this.buffer[3] = (byte)(value >> 32);
-            this.buffer[4] = (byte)(value >> 24);
-            this.buffer[5] = (byte)(value >> 16);
-            this.buffer[6] = (byte)(value >> 8);
-            this.buffer[7] = (byte)value;
-
-            this.stream.Write(this.buffer, 0, 8);
+            Span<byte> buffer = stackalloc byte[sizeof(long)];
+            BinaryPrimitives.WriteInt64BigEndian(buffer, value);
+            this.stream.Write(buffer);
         }
 
         /// <summary>
@@ -157,14 +149,14 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        [SkipLocalsInit]
         public void Write(ushort value)
         {
             VerifyNotDisposed();
 
-            this.buffer[0] = (byte)(value >> 8);
-            this.buffer[1] = (byte)value;
-
-            this.stream.Write(this.buffer, 0, 2);
+            Span<byte> buffer = stackalloc byte[sizeof(ushort)];
+            BinaryPrimitives.WriteUInt16BigEndian(buffer, value);
+            this.stream.Write(buffer);
         }
 
         /// <summary>
@@ -172,16 +164,14 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        [SkipLocalsInit]
         public void Write(uint value)
         {
             VerifyNotDisposed();
 
-            this.buffer[0] = (byte)(value >> 24);
-            this.buffer[1] = (byte)(value >> 16);
-            this.buffer[2] = (byte)(value >> 8);
-            this.buffer[3] = (byte)value;
-
-            this.stream.Write(this.buffer, 0, 4);
+            Span<byte> buffer = stackalloc byte[sizeof(uint)];
+            BinaryPrimitives.WriteUInt32BigEndian(buffer, value);
+            this.stream.Write(buffer);
         }
 
         /// <summary>
@@ -189,20 +179,14 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
+        [SkipLocalsInit]
         public void Write(ulong value)
         {
             VerifyNotDisposed();
 
-            this.buffer[0] = (byte)(value >> 56);
-            this.buffer[1] = (byte)(value >> 48);
-            this.buffer[2] = (byte)(value >> 40);
-            this.buffer[3] = (byte)(value >> 32);
-            this.buffer[4] = (byte)(value >> 24);
-            this.buffer[5] = (byte)(value >> 16);
-            this.buffer[6] = (byte)(value >> 8);
-            this.buffer[7] = (byte)value;
-
-            this.stream.Write(this.buffer, 0, 8);
+            Span<byte> buffer = stackalloc byte[sizeof(ulong)];
+            BinaryPrimitives.WriteUInt64BigEndian(buffer, value);
+            this.stream.Write(buffer);
         }
 
         /// <summary>
@@ -210,18 +194,14 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
-        public unsafe void Write(float value)
+        [SkipLocalsInit]
+        public void Write(float value)
         {
             VerifyNotDisposed();
 
-            int temp = *(int*)&value;
-
-            this.buffer[0] = (byte)(temp >> 24);
-            this.buffer[1] = (byte)(temp >> 16);
-            this.buffer[2] = (byte)(temp >> 8);
-            this.buffer[3] = (byte)temp;
-
-            this.stream.Write(this.buffer, 0, 4);
+            Span<byte> buffer = stackalloc byte[sizeof(float)];
+            BinaryPrimitives.WriteSingleBigEndian(buffer, value);
+            this.stream.Write(buffer);
         }
 
         /// <summary>
@@ -229,22 +209,14 @@ namespace AbrFileTypePlugin
         /// </summary>
         /// <param name="value">The value.</param>
         /// <exception cref="ObjectDisposedException">The object has been disposed.</exception>
-        public unsafe void Write(double value)
+        [SkipLocalsInit]
+        public void Write(double value)
         {
             VerifyNotDisposed();
 
-            long temp = *(long*)&value;
-
-            this.buffer[0] = (byte)(temp >> 56);
-            this.buffer[1] = (byte)(temp >> 48);
-            this.buffer[2] = (byte)(temp >> 40);
-            this.buffer[3] = (byte)(temp >> 32);
-            this.buffer[4] = (byte)(temp >> 24);
-            this.buffer[5] = (byte)(temp >> 16);
-            this.buffer[6] = (byte)(temp >> 8);
-            this.buffer[7] = (byte)temp;
-
-            this.stream.Write(this.buffer, 0, 8);
+            Span<byte> buffer = stackalloc byte[sizeof(double)];
+            BinaryPrimitives.WriteDoubleBigEndian(buffer, value);
+            this.stream.Write(buffer);
         }
 
         /// <summary>
