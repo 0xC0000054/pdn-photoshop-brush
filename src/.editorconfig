@@ -55,7 +55,9 @@ csharp_style_var_for_built_in_types                                      = false
 csharp_style_var_when_type_is_apparent                                   = false : silent
 
 # IDE0057: Use range operator
-csharp_style_prefer_range_operator = false:suggestion
+csharp_style_prefer_range_operator = false : suggestion
+# IDE0066 Use 'switch' expression
+csharp_style_prefer_switch_expression = false : suggestion
 
 [*.{cs,vb}]
 dotnet_sort_system_directives_first                              = false
