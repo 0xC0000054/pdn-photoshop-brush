@@ -37,9 +37,7 @@ namespace AbrFileTypePlugin
 {
     internal sealed class BigEndianBinaryWriter : IDisposable
     {
-#pragma warning disable IDE0032 // Disable the 'Use Auto Property' suggestion
         private Stream stream;
-#pragma warning restore IDE0032
 
         private readonly bool leaveOpen;
 
