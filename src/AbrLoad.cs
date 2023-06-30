@@ -32,7 +32,6 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace AbrFileTypePlugin
 {
@@ -408,16 +407,16 @@ namespace AbrFileTypePlugin
                         int srcStride = width * 2;
                         for (int y = 0; y < height; y++)
                         {
-                            byte* src = ptr + (y * srcStride);
+                            ushort* src = (ushort*)(ptr + (y * srcStride));
                             ColorBgra* dst = surface.GetRowPointerUnchecked(y);
 
                             for (int x = 0; x < width; x++)
                             {
-                                ushort value = ReadUInt16BigEndian(src);
+                                ushort value = BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(*src) : *src;
 
                                 dst->A = SixteenBitConversion.GetEightBitValue(value);
 
-                                src += 2;
+                                src++;
                                 dst++;
                             }
                         }
@@ -448,13 +447,6 @@ namespace AbrFileTypePlugin
             }
 
             return brush;
-
-            static unsafe ushort ReadUInt16BigEndian(byte* ptr)
-            {
-                ushort value = Unsafe.ReadUnaligned<ushort>(ptr);
-
-                return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
-            }
         }
 
         private static Size ComputeBrushSize(int originalWidth, int originalHeight, int maxEdgeLength)
