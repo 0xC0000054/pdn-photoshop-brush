@@ -451,7 +451,7 @@ namespace AbrFileTypePlugin
 
             static unsafe ushort ReadUInt16BigEndian(byte* ptr)
             {
-                ushort value = Unsafe.ReadUnaligned<ushort>(ref *ptr);
+                ushort value = Unsafe.ReadUnaligned<ushort>(ptr);
 
                 return BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(value) : value;
             }
